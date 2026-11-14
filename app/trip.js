@@ -78,6 +78,19 @@
       weight_complete_day: card.weight_complete_day, earliest_sellable_day: sellable ? sellable.date : null,
       ship_by_day: shipBy ? shipBy.date : null, too_long: days > truck.max_transit_days,
       chilling_risk: transitTemp < 10 };
+    if (trip.delivery_deadline) {
+      const ready = rows.find(r => card.weight_complete_day && r.date >= card.weight_complete_day &&
+        r.date >= card.today && addDays(r.date, days) <= trip.delivery_deadline &&
+        r.sellable_on_arrival >= truck.earliest_sellable_share && r.best_days >= need);
+      if (!ready) return { ...base, pluck_day: null, pluck_reason: 'deadline' };
+      const arrival = addDays(ready.date, days);
+      const on = n => n == null ? null : addDays(arrival, n);
+      return { ...base, pluck_day: ready.date, pluck_reason: 'ready_by', arrival_day: arrival,
+        pct_at_pluck: ready.pct_at_pluck, pct_on_arrival: ready.pct_on_arrival,
+        sellable_on_arrival: ready.sellable_on_arrival, best_from: on(ready.best_from),
+        best_until: on(ready.best_until), sell_until: on(ready.sell_until),
+        best_shelf_days: ready.best_days, late: false };
+    }
     if (!card.weight_complete_day || !sellable) return { ...base, pluck_day: null, pluck_reason: 'beyond_forecast' };
     const options = [['weight', card.weight_complete_day], ['sellable', sellable.date], ['today', card.today]];
     let [reason, pluck] = options[0];

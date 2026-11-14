@@ -106,7 +106,7 @@ def check_static() -> list[str]:
             errs.append(f'{f}: absolute path in src/href')
     if D3 not in (APP / 'index.html').read_text(encoding='utf-8'):
         errs.append('index.html does not load the pinned d3 v7.9.0 from cdnjs')
-    if 'Demo customer — replayed 2024 data' not in (APP / 'index.html').read_text(encoding='utf-8'):
+    if '2024 greenhouse trial replay' not in (APP / 'index.html').read_text(encoding='utf-8'):
         errs.append('index.html lacks the demo banner text')
     return errs
 

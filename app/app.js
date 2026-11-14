@@ -7,9 +7,10 @@
 (function () {
   'use strict';
 
-  const FILES = ['customers', 'rooms', 'days', 'forecast', 'whatif', 'evidence', 'alerts', 'backtest', 'assumptions'];
+  const FILES = ['rooms', 'days', 'forecast', 'whatif', 'evidence', 'alerts', 'backtest', 'assumptions'];
   const OPTIONAL = ['shipping'];          // shipping extension; mock/ has none, so the section hides
   const PLUCK_WHY = {
+    ready_by: 'it is the first day that meets crop readiness, shelf life and your delivery deadline',
     weight: 'the fruit is estimated to stop gaining weight on this day, so picking from then on costs no weight; it only turns red after that',
     sellable: 'it is the first day enough pots are ready to sell when they arrive (the fruit had already stopped growing)',
     today: 'both conditions are already met: the fruit has stopped growing and enough pots sell on arrival',
@@ -91,7 +92,7 @@
   async function load() {
     // Probe one file first so a missing data/ folder costs a single 404, then load the rest.
     let hasData = false;
-    try { hasData = (await fetch('data/customers.json', { cache: 'no-cache' })).ok; } catch (e) { hasData = false; }
+    try { hasData = (await fetch('data/rooms.json', { cache: 'no-cache' })).ok; } catch (e) { hasData = false; }
     S.base = hasData ? 'data/' : 'mock/';
     S.data = await loadFolder(S.base);
     S.mock = FILES.some((f) => S.data[f].meta && S.data[f].meta.mock);
@@ -108,7 +109,6 @@
   }
   function buildIndex() {
     const D = S.data;
-    idx.customers = D.customers.rows;
     idx.rooms = new Map(D.rooms.rows.map((r) => [r.room, r]));
     idx.days = new Map(D.days.rows.map((r) => [r.room + '|' + r.today, r]));
     idx.daysByRoom = groupBy(D.days.rows, (r) => r.room);
@@ -128,8 +128,9 @@
     idx.minToday = d3.min(todays);
     idx.maxToday = d3.max(todays);
   }
-  const customer = () => idx.customers.find((c) => c.customer_id === S.customer) || idx.customers[0];
-  const roomName = (id) => (idx.rooms.get(id) || {}).display_name || id;
+  const roomNames = {mugrow:'MuGrow', trigger:'Trigger', ideas:'IDEAS', agrifusion:'Agrifusion',
+    reference:'Reference', tomatonuts:'Tomatonuts'};
+  const roomName = id => roomNames[id] || id;
   function photoURL(p) {
     if (!p) return null;
     if (/^(data|mock)\//.test(p)) return p;
@@ -145,20 +146,15 @@
     const p = new URLSearchParams(location.hash.slice(1));
     S.view = ['home', 'room', 'alerts', 'how', 'input'].includes(p.get('view')) ? p.get('view') : 'home';
     S.room = p.get('room');
-    const owner = S.room && idx.rooms.get(S.room);
-    if (owner && !p.get('c')) S.customer = owner.customer_id;   // deep link to a room opens its own customer
-    if (p.get('c') && idx.customers.some((c) => c.customer_id === p.get('c'))) S.customer = p.get('c');
-    if (!S.customer) S.customer = idx.customers[0].customer_id;
     const t = p.get('t');
     if (t && /^\d{4}-\d{2}-\d{2}$/.test(t)) S.today = clampToday(t);
-    if (S.view === 'room' && !(S.room && customer().rooms.includes(S.room))) S.view = 'home';
+    if (S.view === 'room' && !idx.rooms.has(S.room)) S.view = 'home';
   }
   function hashFor(over = {}) {
-    const st = Object.assign({ view: S.view, room: S.room, c: S.customer, t: S.today }, over);
+    const st = Object.assign({ view: S.view, room: S.room, t: S.today }, over);
     const p = new URLSearchParams();
     p.set('view', st.view);
     if (st.view === 'room' && st.room) p.set('room', st.room);
-    p.set('c', st.c);
     p.set('t', st.t);
     return '#' + p.toString();
   }
@@ -171,9 +167,6 @@
 
   /* ---------- controls ---------- */
   function initControls() {
-    const sel = $('#customer');
-    sel.innerHTML = idx.customers.map((c) => `<option value="${esc(c.customer_id)}">${esc(c.name)} (demo)</option>`).join('');
-    sel.addEventListener('change', () => go({ c: sel.value, view: S.view === 'room' ? 'home' : S.view }));
     const inp = $('#today');
     inp.min = idx.minToday;
     inp.max = idx.maxToday;
@@ -200,7 +193,6 @@
     if (S.view !== 'input') render();
   }
   function syncControls() {
-    $('#customer').value = S.customer;
     $('#today').value = S.today;
     $('#day-prev').disabled = S.today <= idx.minToday;
     $('#day-next').disabled = S.today >= idx.maxToday;
@@ -210,7 +202,7 @@
       const on = v === S.view || (v === 'home' && S.view === 'room');
       if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
-    const n = recentAlerts(customer().rooms).length;
+    const n = recentAlerts([...idx.rooms.keys()]).length;
     $('#alert-count').textContent = n ? String(n) : '';
     $('#mock-flag').hidden = !S.mock;
     const m = S.data.days.meta;
@@ -239,8 +231,7 @@
 
   /* ---------- screen 1: my greenhouses ---------- */
   function renderHome() {
-    const c = customer();
-    const states = c.rooms.map((r) => ({ room: r, ...roomState(r) }));
+    const states = [...idx.rooms.keys()].map((r) => ({ room: r, ...roomState(r) }));
     const live = states.filter((s) => s.kind === 'live');
     const counts = d3.rollup(live, (v) => v.length, (s) => s.d.status);
     const bits = Object.keys(STATUS).filter((k) => counts.get(k)).map((k) => `${plural(counts.get(k), 'room')} <b>${STATUS[k].label.toLowerCase()}</b>`);
@@ -248,8 +239,7 @@
     if (done) bits.push(`${plural(done, 'room')} already harvested`);
     main.innerHTML = `
       <div class="page-head">
-        <h1>${esc(c.name)}</h1>
-        <p class="muted">${esc(c.tagline)}</p>
+        <h1>Greenhouse harvest outlook</h1>
         <p class="lede">On <b>${day(S.today)}</b>: ${bits.length ? bits.join(', ') : 'no forecast for this day'}.</p>
       </div>
       <div class="grid">${states.map(roomCard).join('')}</div>`;
@@ -288,7 +278,7 @@
     const room = S.room;
     const st = roomState(room);
     const meta = st.meta;
-    const back = `<a class="back" href="${hashFor({ view: 'home' })}">← My greenhouses</a>`;
+    const back = `<a class="back" href="${hashFor({ view: 'home' })}">← Compartments</a>`;
     if (st.kind !== 'live') {
       const last = (idx.daysByRoom.get(room) || []).filter((r) => r.today < meta.actual_harvest).pop();
       main.innerHTML = `${back}<div class="page-head"><h1>${esc(roomName(room))}</h1>
@@ -364,7 +354,7 @@
       </div>
       ${idx.dests.length ? `<section class="card section" id="ship">
         <h2>When to pluck for shipping</h2>
-        <p class="muted small">Pick where the pots go. The pluck day is the earliest day the fruit has stopped gaining weight and enough pots are ready to sell when they arrive; picking later only uses up shelf life.</p>
+        <p class="muted small">Preset routes show the earliest harvest that meets crop readiness on arrival. Enter a buyer deadline under “Plan your own trip” to check whether delivery is possible.</p>
         <div class="whatif-ctl">
           <label for="dest" class="ctl-label">Destination</label>
           <select id="dest">${idx.dests.map((x) => `<option value="${esc(x.id)}"${x.id === S.dest ? ' selected' : ''}>${esc(x.name)} · ${Math.round(x.distance_km / 1.609344).toLocaleString('en')} mi · ${x.transit_days ? plural(x.transit_days, 'day') + ' by truck' : 'same day'}</option>`).join('')}</select>
@@ -381,6 +371,7 @@
           <label>Truck temperature (°C)<input name="transit_temp_c" type="number" min="0" max="30" step="0.5" value="${idx.truck.temp_c}" required></label>
           <label>Shop temperature (°C)<input name="shop_temp_c" type="number" min="5" max="35" step="0.5" value="${idx.truck.shop_temp_c}" required></label>
           <label>Best days wanted on the shelf<input name="min_best_shelf_days" type="number" min="1" max="14" step="1" value="${idx.truck.min_best_shelf_days}" required></label>
+          <label>Deliver by (optional)<input name="delivery_deadline" type="date" min="${S.today}"></label>
           <button class="btn" type="submit">Work out the pluck day</button>
         </form>
         <div id="trip-out" aria-live="polite"></div>
@@ -482,6 +473,7 @@
   /* ---------- custom trip and shipping assistant (shipping extension) ---------- */
   function tripHTML(plan, label) {
     if (!plan.pluck_day) {
+      if (plan.pluck_reason === 'deadline') return '<p class="finding">No harvest date meets the delivery deadline, crop readiness and shelf-life requirements together.</p>';
       return `<p class="finding">${esc(label)}: no pluck day within the 21-day forecast yet (fruit estimated to stop growing ${day(plan.weight_complete_day)}).</p>`;
     }
     const warn = [];
@@ -502,7 +494,8 @@
       if (!form.checkValidity()) { $('#trip-out').innerHTML = '<p class="muted small">Check the highlighted values.</p>'; return; }
       const f = new FormData(form);
       const plan = Trip.planTrip(fc, d, idx.truck, { distance_km: +f.get('distance_miles') * 1.609344, drivers: +f.get('drivers'),
-        transit_temp_c: +f.get('transit_temp_c'), shop_temp_c: +f.get('shop_temp_c'), min_best_shelf_days: +f.get('min_best_shelf_days') });
+        transit_temp_c: +f.get('transit_temp_c'), shop_temp_c: +f.get('shop_temp_c'), min_best_shelf_days: +f.get('min_best_shelf_days'),
+        delivery_deadline: f.get('delivery_deadline') });
       $('#trip-out').innerHTML = tripHTML(plan, String(f.get('name') || 'Your trip') + ` (${(+f.get('distance_miles')).toLocaleString('en')} mi)`);
     };
     form.addEventListener('submit', (e) => { e.preventDefault(); run(); });
@@ -818,12 +811,11 @@ Rules:
 
   /* ---------- screen 3: alerts ---------- */
   function renderAlerts() {
-    const c = customer();
-    const list = idx.alerts.filter((a) => c.rooms.includes(a.room) && a.date <= S.today);
-    const recent = recentAlerts(c.rooms).length;
+    const list = idx.alerts.filter((a) => a.date <= S.today);
+    const recent = recentAlerts([...idx.rooms.keys()]).length;
     main.innerHTML = `
       <div class="page-head"><h1>Alerts</h1>
-        <p class="lede">${plural(recent, 'alert')} in the last ${ALERT_DAYS} days up to ${day(S.today)}, across the rooms at ${esc(c.name)}. Older ones are listed below for the record.</p></div>
+        <p class="lede">${plural(recent, 'alert')} in the last ${ALERT_DAYS} days up to ${day(S.today)} across all six compartments.</p></div>
       ${list.length ? `<ul class="alert-list">${list.map(alertItem).join('')}</ul>` : '<p class="empty">No alerts up to this day.</p>'}
       <p class="caption">Kinds: behind or ahead of schedule (photo or crop sample outside the forecast range), sensor check (missing, flat or out-of-range readings), room drifting (gaining warmth much slower than the other rooms). Disease detection is not in this version. Source: alerts.json.</p>`;
   }
@@ -880,7 +872,7 @@ Rules:
           <li>Fruit dry matter (part of the real price) is not in the data, and harvest labour is not costed.</li>
           <li>The temperature what-if assumes ripening follows warmth; it was not tested by changing a greenhouse.</li>
           <li>Profit on days other than the actual harvest is a model estimate: each room was harvested once.</li>
-          <li>Customer names are fictional. Each "customer" is two rooms of the same research trial.</li>
+
         </ul></section>
       <section class="card section"><h2>Data and credits</h2>
         <ul class="limits">
@@ -975,21 +967,23 @@ Rules:
       ['price','Sale price per pot (€)','number',2.15,.01,100],
       ['spent','Growing cost so far (€/m²)','number',5,0,10000],
       ['cost','Daily growing cost (€/m²)','number',.25,0,100],
-      ['transit','Truck travel (days)','number',2,0,21]
+      ['transit','Truck travel (days)','number',2,0,21],
+      ['shelfDays','Best shelf days wanted','number',3,1,14],
+      ['deadline','Deliver by (optional)','date','']
     ];
     main.innerHTML = '<section class="card field-hero"><div><span class="ctl-label">Forecast demo</span>' +
       '<h1>Plan a new room</h1><p>Enter a crop check, then see three harvest dates.</p></div></section>' +
       '<form class="card section" id="grower-form"><h2>Room and crop check</h2><div class="intake-fields">' +
       '<label>Room name<input name="name" value="My greenhouse" required maxlength="60"></label>' +
-      fields.map(([key,label,type,value,min,max]) => '<label>' + label + '<input required name="' + key +
+      fields.map(([key,label,type,value,min,max]) => '<label>' + label + '<input ' + (key === 'deadline' ? '' : 'required ') + 'name="' + key +
         '" type="' + type + '" value="' + value + '"' +
-        (type === 'number' ? ' min="' + min + '" max="' + max + '" step="' + (key === 'transit' ? '1' : 'any') + '"' : '') +
+        (type === 'number' ? ' min="' + min + '" max="' + max + '" step="' + (['transit','shelfDays'].includes(key) ? '1' : 'any') + '"' : '') +
         '></label>').join('') + '</div><div class="intake-upload"><label>Upload temperatures (.csv), optional' +
       '<input type="file" name="climate" accept=".csv,text/csv"></label>' +
       '<a download="temperature-example.csv" href="temperature-example.csv">Download an example CSV</a></div>' +
       '<p class="caption">Upload 3–7 daily averages ending on the crop check date. The file replaces the manual temperature.</p>' +
       '<button class="btn" type="submit">Estimate harvest dates</button><p id="intake-error" role="alert"></p></form>' +
-      '<section class="card section" id="intake-result" hidden><h2 id="intake-title"></h2><div id="intake-chart"></div>' +
+      '<section class="card section" id="intake-result" hidden><h2 id="intake-title"></h2><p id="intake-shipping"></p><div id="intake-chart"></div>' +
       '<details><summary>Assumptions and data handling</summary><p>This browser demo anchors a trial curve (slope 0.035 per degree-day) to your crop check and holds future warmth constant. ' +
       'The estimated weight-ready date comes from your input. The financial chart uses fixed fruit weight, €0.75 per pot, and your entered growing costs. ' +
       'Shipping is a trial-model estimate for whole pots. The simulator has no measured shipment outcomes. No calibration or confidence grade is generated for your room. Files stay in this browser.</p></details></section>';
@@ -1011,6 +1005,11 @@ Rules:
         for (const [key,,type] of fields) if (type === 'number') values[key] = Number(values[key]);
         const result = Grower.project({...values,slope:.035},observations,idx.truck,Trip);
         $('#intake-title').textContent = values.name + ' · estimated harvest dates';
+        $('#intake-shipping').textContent = result.shipping.pluck_reason === 'deadline'
+          ? 'No harvest date meets the delivery deadline, crop readiness and shelf-life requirements together.'
+          : result.shipping.arrival_day ? 'Estimated arrival ' + short(result.shipping.arrival_day) +
+            (values.deadline ? ' · deliver by ' + short(values.deadline) : ' · no buyer deadline entered')
+            : 'Shipping readiness falls outside this outlook.';
         output.hidden = false;
         showGoals($('#intake-chart'), result.rows, {
           best:result.best?.date, ship:result.shipping.pluck_day, look:result.rows.find(row=>row.pct_red>=70)?.date,

@@ -321,9 +321,12 @@ dl.ev dd { margin: 0; font-variant-numeric: tabular-nums; }
   --bg:#121417; --surface:#1a1d21; --grid:#22262b; --text:#eceae4;
   --brand:#7aa2ff; --series:#eceae4; --goal-zone:#1b2c44; --goal-loss:#3a1d1a;
 }
-body { background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px); background-size:32px 32px; }
-.card,.kpis { border-color:var(--text); box-shadow:none; border-radius:14px; }
-.room-card { border-width:2px; }
+body { background:var(--bg); }
+.top,.tabs { background:var(--surface); }
+.page-head h1 { font-family:var(--numbers); font-size:clamp(2.25rem,5vw,3.5rem); font-weight:700; }
+.card,.kpis { border-color:var(--line); box-shadow:none; border-radius:14px; }
+.field-hero { border-top:4px solid var(--brand); }
+.room-card { border-width:1px; }
 .brand-name,.rc-best,.kpi-v,.field-hero h1,.day-tile b,.goal-pins strong { font-family:var(--numbers); font-weight:700; }
 .field-hero { margin-bottom:16px; }
 .field-hero h1 { font-size:clamp(2.5rem,6vw,4rem); line-height:1; text-transform:uppercase; margin:.35rem 0; }

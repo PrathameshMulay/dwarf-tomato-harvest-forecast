@@ -91,6 +91,7 @@ The grower dashboard ships with demo data. From the repo root, run
 
 - Open a room and toggle **Economics**, **Ripeness**, and **Shipping**. Each chart shows its own units against harvest dates. The shipping chart follows the selected buyer.
 - Open **Add a room** and enter crop weights, temperature, and costs. To demonstrate upload, download the example CSV and select it in the form. Uploaded daily temperatures replace the manual average. The demo processes the file in the browser and saves no room to the replay dataset.
+- **Deliver by** is optional in Add a room and Plan your own trip. Enter the buyer’s latest arrival date to require full fruit weight at harvest, enough saleable pots at arrival, and the requested best shelf days in the same plan. Without the deadline, the Shipping date is the earliest modeled crop-ready date for that route.
 - The new-room estimate uses a fixed sample-anchored trial curve, a grower-entered date for full fruit weight, and assumed costs and transport conditions. Its economics chart shows total estimated euros per square meter at harvest. The existing replay chart shows euros per square meter per growing day. The new-room estimate is unvalidated on customer crops.
 
 ```bash

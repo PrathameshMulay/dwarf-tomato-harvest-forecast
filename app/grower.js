@@ -22,6 +22,7 @@
   function project(o, observations, truck, trip) {
     if (!dateOK(o.today) || !dateOK(o.planted) || o.planted > o.today) throw Error("Planting must be on or before the crop check date.");
     if (!dateOK(o.fullWeightDay) || o.fullWeightDay < o.planted) throw Error("Enter a fruit weight-ready date on or after planting.");
+    if (o.deadline && (!dateOK(o.deadline) || o.deadline < o.today)) throw Error("Delivery date must be on or after the crop check date.");
     if (observations?.at(-1).date !== o.today && observations) throw Error("The last CSV date must match the crop check date.");
     if (observations?.[0].date < o.planted) throw Error("Climate dates must be on or after planting.");
     if (o.redWeight > o.weight) throw Error("Red fruit weight cannot exceed total fruit weight.");
@@ -37,7 +38,7 @@
     const sellable = rows.filter(row => row.sellable_share >= truck.earliest_sellable_share && row.date >= o.fullWeightDay);
     const best = sellable.reduce((a,b) => !a || b.profit_m2_day > a.profit_m2_day ? b : a, null);
     const card = {today:o.today,k_x1000:1000*o.slope,weight_complete_day:o.fullWeightDay};
-    const route = {transit_days:o.transit};
+    const route = {transit_days:o.transit,delivery_deadline:o.deadline,min_best_shelf_days:o.shelfDays};
     const shipping = trip.planTrip(rows,card,truck,route);
     return {rows, best, shipping, arrivalRows:trip.projectTrip(rows,card,truck,route)};
   }
