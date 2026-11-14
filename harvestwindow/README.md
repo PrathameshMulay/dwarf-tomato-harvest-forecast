@@ -2,7 +2,7 @@
 
 HarvestWindow helps a dwarf-tomato greenhouse manager decide whether to harvest a room today, wait for more ripening, or check a small crop sample before committing. Open [the dashboard](dashboard/index.html) in Chrome or Edge. It runs locally from the checked-in replay and camera thumbnails.
 
-The [narrated demo](HarvestWindow-demo.mp4) runs for 1 minute 48 seconds. [Submission copy](SUBMISSION.md) includes the project overview and remaining portal fields.
+The [narrated demo](HarvestWindow-demo.mp4) runs for 1 minute 48 seconds and shows the original forecast workflow; it predates the economics, orders, operations, and task-log additions. [Submission copy](SUBMISSION.md) includes the project overview and remaining portal fields.
 
 ## Run the demo
 
@@ -19,12 +19,25 @@ Requires Python 3.10+ with the packages in `requirements.txt`. Use the official 
 ```powershell
 python -m pip install -r requirements.txt
 python build_replay.py "C:/path/to/autonomous_greenhouse_challenge4_timeseries.zip"
+python build_operations.py "C:/path/to/autonomous_greenhouse_challenge4_timeseries.zip"
 python -m unittest discover -s tests -v
+node tests/test_orders.cjs
 ```
 
 The checked-in noon indices make the replay reproducible offline once the time-series ZIP is present. To refresh the four MuGrow camera thumbnails and their independently measured color indices, run `python camera_frames.py`. It reads only the selected RGB frames through HTTP range requests. An existing local canopy ZIP works with `--archive`.
 
 ## Results
+
+### Operations and delivery workflow
+
+- **Order planning:** enter quantity, deadline, daily harvest/packing capacity, and room area. A dynamic program searches the six-room subsets across candidate dates to maximize fulfilment. Each room is harvested at most once, packing happens that day, and packed pots are assumed to keep until delivery without losses. Surplus supply is not allocated to the order. Expected and lower-envelope schedules are optimized separately; neither is a probability guarantee. Export includes both schedules and inputs. This is a single-order planner, not a multi-order inventory system.
+- **Recorded operations:** thirteen climate, drain, irrigation, energy, and cost summaries for the selected room over October 30–November 5. Numeric coverage and basic range checks are shown alongside raw values. Flags identify data requiring investigation, not confirmed crop problems.
+- **All-channel explorer:** daily mean, minimum, maximum, coverage, and range flags across 129,095 rows and 366 source/channel combinations in six rooms and observed outside weather. Substrate, fluorescence, screen, ventilation, lighting, and CO₂ control channels are accessible. Source units and descriptions come from the supplied `channel_info.json`. These summaries support review; they are not all inputs to the ripening model. Harvest-date outcomes and observations after November 5 are excluded from the operational view.
+- **Task and actual-outcome log:** assign a room, date, owner, and task; record actual pots, revenue, and costs; toggle completion. Entries persist in browser storage and support JSON backup/merge import. Monetary totals include completed entries only. There is no shared backend, role management, or live sensor integration.
+
+The optimizer passed 100 deterministic randomized comparisons with an independent exhaustive enumerator, including room uniqueness, capacity, supply, and quantity constraints. Five Python tests cover forecast behavior and operation-data boundaries. `tests/browser.cjs` checks all rooms, exports, invalid inputs, task persistence, valid/invalid imports, and 390-pixel mobile layout with Playwright. Install Playwright separately to run that optional UI test; `CHROME_PATH` can override its Chrome executable.
+
+See [DATA_COVERAGE.md](DATA_COVERAGE.md) for the data-use inventory and remaining gaps.
 
 The added **Value of waiting** panel accepts greenhouse area, pot price, fruit weight, operating-cost multiplier, space opportunity cost, and sample size and labour cost. It calculates incremental sales and costs relative to harvesting today. It also finds the date minimizing maximum regret across the stated scenarios and estimates the value of a noisy crop sample using equal scenario priors. Sample costs include the entered labour cost and the maximum sale value of sacrificed pots. These monetary outputs are conditional modelling estimates.
 

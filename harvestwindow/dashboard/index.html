@@ -11,11 +11,15 @@
   <script defer src="sample.js"></script>
   <script defer src="economics.js"></script>
   <script defer src="app.js"></script>
+  <script defer src="orders.js"></script>
+  <script defer src="operations-data.js"></script>
+  <script defer src="operations.js"></script>
+  <script defer src="journal.js"></script>
 </head>
 <body>
   <header class="masthead">
     <a class="brand" href="#planner"><span class="brand-mark" aria-hidden="true">✦</span> HarvestWindow</a>
-    <nav aria-label="Sections"><a href="#planner">Planner</a><a href="#evidence">Backtest</a><a href="#methods">Methods</a></nav>
+    <nav aria-label="Sections"><a href="#planner">Planner</a><a href="#orders">Orders</a><a href="#operations">Operations</a><a href="#journal">Tasks</a><a href="#evidence">Backtest</a></nav>
   </header>
   <main id="planner">
     <div class="intro">
@@ -72,6 +76,50 @@
       <p id="risk-summary"></p><p id="sample-value"></p>
       <details><summary>Compare all candidate days</summary><div class="table-scroll"><table id="economics-table"><thead><tr><th>Date</th><th>Sales</th><th>Future costs</th><th>Space cost</th><th>Value vs today</th><th>Sellable</th></tr></thead><tbody></tbody></table></div></details>
       <p class="note">Conditional scenarios from the initial forecast. Existing cultivation costs are sunk for this decision. Crop-state scenarios receive equal weight. Sample noise assumes 15 percentage points of plant variation plus 3 points of measurement uncertainty. Prices, crop weight, and space value are entered assumptions. This analysis estimates the value of information within the model.</p>
+    </section>
+<section id="orders" class="panel evidence">
+<p class="eyebrow">Six-room order planning</p><h2>Can we deliver the order?</h2>
+<p>Replay starts at the end of November 5, 2024. Order quantity, room area, and packing capacity are editable demonstration inputs.</p>
+<form id="order-form" class="method-grid">
+<label>Order quantity (pots)<input name="quantity" type="number" min="1" max="1000000" step="1" value="1500" required></label>
+<label>Delivery deadline<input name="deadline" type="date" min="2024-11-06" max="2024-11-26" value="2024-11-08" required></label>
+<label>Daily harvest and packing capacity (pots)<input name="capacity" type="number" min="1" max="100000" step="1" value="600" required></label>
+<label>Area per room (m²)<input name="area" type="number" min="1" max="100000" step="1" value="96" required></label>
+<label><input name="samples" type="checkbox"> Reveal all recorded November 5 samples</label>
+</form>
+<p id="order-result" aria-live="polite"></p>
+<div class="table-scroll"><table id="order-table"><thead><tr><th>Harvest and pack</th><th>Room</th><th>Allocated pots</th><th>Forecast sellable pots</th></tr></thead><tbody></tbody></table></div>
+<button id="export-order" class="primary" type="button">Export plan</button>
+<p class="note">Searches all combinations of the six rooms to maximize fulfilled pots by the deadline, with one harvest per room and same-day packing. Assumes packed pots can be held until delivery without losses. Only allocated pots count toward this order; surplus room inventory needs a separate sales plan. The lower envelope is a sensitivity check, not a delivery guarantee. The two scenarios may produce different schedules. This planner uses its own sample switch and the original camera-informed forecasts.</p>
+</section>
+    <section id="operations" class="panel evidence">
+      <p class="eyebrow">Recorded operations · Selected greenhouse</p><h2>Climate, resources, and sensor checks</h2>
+      <p id="operations-summary"></p>
+      <div class="table-scroll"><table id="operations-table"><thead><tr><th>Recorded channel</th><th>Value</th><th>Aggregation</th><th>Numeric coverage</th><th>Quality check</th></tr></thead><tbody></tbody></table></div>
+      <p class="note">Coverage measures numeric availability, not sensor accuracy. Basic range checks flag pH outside 0.1–14, humidity outside 0–100%, temperature outside −10–60°C, PAR outside 0–4,000, and CO₂ outside 0–10,000 ppm. These are screening bounds, not crop targets or disease diagnoses. Values near zero, frozen sensors, calibration and undocumented sentinels still need investigation.</p>
+      <details><summary>Explore all recorded sensor and control channels</summary>
+        <div class="method-grid"><label>Data source<select id="data-source"></select></label><label>Find a channel<input id="channel-search" type="search" placeholder="substrate, fluorescence, screen…"></label><label>Channel<select id="data-channel"></select></label></div>
+        <p id="channel-summary"></p>
+        <div class="table-scroll channel-history"><table id="channel-table"><thead><tr><th>Date</th><th>Mean</th><th>Minimum</th><th>Maximum</th><th>Coverage</th><th>Range flags</th></tr></thead><tbody></tbody></table></div>
+        <button id="export-data" type="button">Export source history</button>
+        <p class="note">Daily summaries retain all available observations through November 5, including control settings and fluorescence channels. Means are descriptive summaries; cumulative counters are not resource totals. Future records and harvest-date labels are excluded. Outside weather is observed context. The forecast-weather archive is excluded until issue and target times can be established.</p>
+      </details>
+    </section>
+    <section id="journal" class="panel evidence">
+      <p class="eyebrow">Local management log</p><h2>Assign work and record outcomes</h2>
+      <form id="journal-form" class="method-grid">
+        <label>Room<select name="room"></select></label><label>Date<input name="date" type="date" value="2024-11-06" required></label>
+        <label>Owner<input name="owner" maxlength="100" required></label><label>Task or outcome<input name="task" maxlength="500" required placeholder="Check drain pH sensor"></label>
+        <label>Actual pots (optional)<input name="pots" type="number" min="0" max="1000000" step="1" value="0" required></label>
+        <label>Actual revenue (€)<input name="revenue" type="number" min="0" step="0.01" value="0" required></label>
+        <label>Actual costs (€)<input name="cost" type="number" min="0" step="0.01" value="0" required></label>
+        <button class="primary" type="submit">Save entry</button>
+      </form>
+      <p id="journal-message" role="status"></p><p id="journal-summary"></p>
+      <div class="table-scroll"><table id="journal-table"><thead><tr><th>Date</th><th>Room</th><th>Owner</th><th>Task / outcome</th><th>Pots</th><th>Revenue €</th><th>Costs €</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+      <button id="export-journal" type="button">Export journal backup</button>
+      <label>Import backup <input id="import-journal" type="file" accept="application/json,.json"></label>
+      <p class="note">Saved only in this browser; no shared accounts or cloud synchronization. Import adds entries with new IDs and retains existing entries. Mark an entry Done to include its actuals in the summary. Record each outcome once to avoid double counting.</p>
     </section>
     <section id="camera-section" class="panel camera-section" aria-labelledby="camera-title">
       <div class="section-heading"><div><p class="eyebrow">Camera evidence</p><h2 id="camera-title">What the canopy camera saw</h2></div></div>

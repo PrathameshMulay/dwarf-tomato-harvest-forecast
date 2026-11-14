@@ -97,3 +97,10 @@ footer { display: flex; justify-content: space-between; gap: 12px; padding: 20px
 
 #economics-form label {display:grid; gap:6px; font-size:13px;}
 #economics-form input {width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;}
+
+#order-form label {display:grid;gap:6px;font-size:13px;} #order-form input {max-width:100%;padding:8px;} #order-form input[type=checkbox] {justify-self:start;}
+#operations select, #operations input, #journal select, #journal input { width: 100%; min-width: 0; padding: .55rem; }
+#operations label, #journal label { display: grid; gap: .4rem; min-width: 0; }
+.channel-history { max-height: 360px; overflow: auto; }
+#journal-message { color: #266248; }
+nav { flex-wrap: wrap; }

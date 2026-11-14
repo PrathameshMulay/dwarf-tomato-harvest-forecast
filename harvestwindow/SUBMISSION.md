@@ -10,6 +10,8 @@ The prototype uses the organizer’s greenhouse climate, plant measurements, ope
 
 ## Demo narration
 
+**Current build additions.** The app also compares the economic value of waiting and sampling, schedules a single order across six rooms under packing constraints, exposes recorded climate/resource summaries and all-channel daily history, flags suspect sensor values, and saves local tasks and actual outcomes with backup import/export. The existing video predates these additions; record a refreshed walkthrough before submitting if these features are part of the pitch. Data coverage and limits are listed in `DATA_COVERAGE.md`.
+
 **Opening.** A dwarf tomato grower sells the whole pot. Pick too early and some pots are still too green. Wait too long and the crop keeps using energy and greenhouse space. HarvestWindow helps the grower decide when it is worth checking the crop before committing the room.
 
 **Forecast.** This is the MuGrow greenhouse at the end of November fifth. We forecast ripeness from accumulated warmth and use camera evidence once it persists across three days. The chart shows the range across ripening and cost scenarios. Today those scenarios disagree, so the planner asks for a crop sample.
