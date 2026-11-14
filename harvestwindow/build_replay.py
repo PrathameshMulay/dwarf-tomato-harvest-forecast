@@ -135,6 +135,7 @@ def create_replay(raw_zip, feature_file):
             "forecastInputs": inputs,
             "centralCurve": asdict(fused),
             "scenarioCurves": [asdict(curve) for curve in fused_paths],
+            "warmthCurves": [asdict(curve) for curve in warm_paths],
             "warmth": warm_plan, "prior": prior, "after": after,
             "images": [{"date": day.isoformat(), "red": red} for day, red in sorted(images[room].items())
                        if earlier <= day <= cut],

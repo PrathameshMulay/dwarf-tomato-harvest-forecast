@@ -20,7 +20,7 @@ let room = "MuGrow";
 let sampled = false;
 let custom = null;
 let metric = "red";
-const currentPlan = (source) => custom?.plan || (sampled ? source.after : source.prior);
+const currentPlan = (source) => $("camera-fallback").checked ? source.warmth : (custom?.plan || (sampled ? source.after : source.prior));
 
 function drawChart() {
   const source = replay.rooms[room];
@@ -143,6 +143,7 @@ function render() {
   button.type = "button";
   button.className = sampled ? "reset" : "primary";
   button.textContent = sampled ? "Reset to initial forecast" : "Reveal recorded crop sample";
+  button.disabled = $("camera-fallback").checked;
   button.addEventListener("click", () => {
     sampled = !sampled;
     custom = null;
@@ -165,6 +166,7 @@ function render() {
   $("sellable").textContent = percent(plan.points[0].sellable);
   $("ripeness").textContent = percent(plan.points[0].red);
   renderCamera(source);
+  renderEconomics(source);
   drawChart();
 }
 
@@ -236,3 +238,11 @@ table("room-results", ["Room", "Days ahead", "Observed", "Without sample", "Sele
     highlight: row.requested,
   })));
 render();
+
+document.getElementById("economics-form").addEventListener("input", () => renderEconomics(replay.rooms[room]));
+document.getElementById("camera-fallback").addEventListener("change", () => {
+  sampled = false;
+  custom = null;
+  $("sample-entry").hidden = $("camera-fallback").checked;
+  render();
+});

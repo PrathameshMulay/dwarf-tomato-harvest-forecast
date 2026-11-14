@@ -26,6 +26,14 @@ The checked-in noon indices make the replay reproducible offline once the time-s
 
 ## Results
 
+The added **Value of waiting** panel accepts greenhouse area, pot price, fruit weight, operating-cost multiplier, space opportunity cost, and sample size and labour cost. It calculates incremental sales and costs relative to harvesting today. It also finds the date minimizing maximum regret across the stated scenarios and estimates the value of a noisy crop sample using equal scenario priors. Sample costs include the entered labour cost and the maximum sale value of sacrificed pots. These monetary outputs are conditional modelling estimates.
+
+The camera switch lets the grower exclude the camera anchor and use warmth-only curves in both the forecast and economic scenarios. The monetary panel always starts from the initial crop-state forecast, allowing the value of obtaining a sample to be examined before revealing it.
+
+The external 2023 time-series archive was downloaded and inspected with `audit_pretrial.py`. The committed `data/pretrial-audit.json` records its 240 destructive measurements, 18,721 climate records, and available labels. It lacks a compatible red-fruit fresh-weight label in the combined sheet, so cross-season accuracy remains unverified. The ZIP is excluded from Git. Download it from the source DOI listed in the audit before rerunning that script.
+
+The supplied weather-forecast CSV exposes one time column and forecast-variable channels. Establishing forecast issue time and target time remains necessary before using it in a historical cost-forecast evaluation. The current economics panel therefore uses the prior seven-day cost rate and explicit cost scenarios.
+
 The replay predicts final-harvest ripeness from November 5 across six held-out rooms, 6–16 days ahead. Error is mean absolute error in percentage points of red fruit fresh weight.
 
 | Approach | Samples revealed | Error |

@@ -9,6 +9,7 @@
   <script defer src="replay-data.js"></script>
   <script defer src="camera/frames.js"></script>
   <script defer src="sample.js"></script>
+  <script defer src="economics.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -56,10 +57,28 @@
       <div class="panel stat"><span>Sellable today</span><strong id="sellable"></strong><small>Estimated share of pots</small></div>
       <div class="panel stat"><span>Ripeness today</span><strong id="ripeness"></strong><small>Red fruit by fresh weight</small></div>
     </div>
+    <section class="panel evidence" id="economics">
+      <p class="eyebrow">Value of waiting</p><h2>What is another day worth?</h2>
+      <form id="economics-form" class="method-grid">
+        <label>Greenhouse area (m²)<input name="area" type="number" min="1" max="100000" value="96" required></label>
+        <label>Maximum price per pot (€)<input name="price" type="number" min="0.01" step="0.01" value="2.15" required></label>
+        <label>Fruit weight per pot (g)<input name="weight" type="number" min="1" max="2000" value="320" required></label>
+        <label>Operating cost multiplier<input name="cost" type="number" min="0" max="10" step="0.1" value="1" required></label>
+        <label>Value of greenhouse time (€/m²/day)<input name="opportunity" type="number" min="0" step="0.01" value="0.10" required></label>
+        <label>Plants to sample<input name="samples" type="number" min="1" max="50" step="1" value="6" required></label>
+        <label>Sampling labour (€)<input name="labor" type="number" min="0" step="1" value="10" required></label>
+      </form>
+      <p id="economic-summary" aria-live="polite"></p>
+      <p id="risk-summary"></p><p id="sample-value"></p>
+      <details><summary>Compare all candidate days</summary><div class="table-scroll"><table id="economics-table"><thead><tr><th>Date</th><th>Sales</th><th>Future costs</th><th>Space cost</th><th>Value vs today</th><th>Sellable</th></tr></thead><tbody></tbody></table></div></details>
+      <p class="note">Conditional scenarios from the initial forecast. Existing cultivation costs are sunk for this decision. Crop-state scenarios receive equal weight. Sample noise assumes 15 percentage points of plant variation plus 3 points of measurement uncertainty. Prices, crop weight, and space value are entered assumptions. This analysis estimates the value of information within the model.</p>
+    </section>
     <section id="camera-section" class="panel camera-section" aria-labelledby="camera-title">
       <div class="section-heading"><div><p class="eyebrow">Camera evidence</p><h2 id="camera-title">What the canopy camera saw</h2></div></div>
       <p id="camera-status"></p>
       <div id="camera-frames" class="frames"></div>
+      <label><input id="camera-fallback" type="checkbox"> Exclude camera evidence and use warmth only</label>
+      <p class="note">Use this fallback when camera evidence is missing or inconsistent. Four MuGrow views are available in this demo; other rooms use the recorded noon series.</p>
     </section>
     <section id="evidence" class="panel evidence" aria-labelledby="evidence-title">
       <div class="section-heading"><div><p class="eyebrow">Six held-out greenhouses</p><h2 id="evidence-title">Did the sampling policy help?</h2></div></div>
@@ -70,6 +89,10 @@
     </section>
     <section id="methods" class="panel evidence" aria-labelledby="methods-title">
       <div class="section-heading"><div><p class="eyebrow">Model and assumptions</p><h2 id="methods-title">How the recommendation works</h2></div></div>
+      <details><summary>External season and validation readiness</summary>
+        <p>The public 2023 pre-trial archive was inspected. It contains 240 destructive plant records and 18,721 climate records. Its combined measurement sheet includes red-fruit count and total fruit-cluster weight, but no separate red-fruit fresh-weight label. Cross-season validation of this planner's weight-fraction target remains pending.</p>
+        <a href="https://doi.org/10.4121/e1ee9de9-6ce9-4502-a37c-34b5b1372bed.v1">2023 pre-trial source</a>
+      </details>
       <div class="method-grid">
         <article><h3>Forecast ripening</h3><p>Fit a ripening curve to accumulated warmth in five completed greenhouse rooms. Shift it for the held-out room once three consecutive days of red canopy pixels are visible. Use warmth when that signal is missing.</p></article>
         <article><h3>Compare harvest days</h3><p>Vary the ripening curve, warmth, daily costs and sale price. Use an 85% sellable-pot target and the earliest date within €0.005/m²/day of the scenario optimum. Scenario ranges describe sensitivity to these assumptions.</p></article>
