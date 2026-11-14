@@ -14,6 +14,8 @@ The [narrated demo](HarvestWindow-demo.mp4) runs for 1 minute 48 seconds and sho
 
 ## Rebuild
 
+See [ML_EVALUATION.md](ML_EVALUATION.md) for the experimental forecasting benchmark and step-by-step reproduction. The offline Model comparison section displays the results alongside the existing logistic forecast.
+
 Requires Python 3.10+ with the packages in `requirements.txt`. Use the official time-series ZIP without extracting it.
 
 ```powershell

@@ -9,6 +9,11 @@ const assert = require('node:assert/strict');
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     await page.goto(pathToFileURL(path.resolve(__dirname,'../dashboard/index.html')).href);
     await page.waitForSelector('#operations-table tbody tr');
+    assert.equal(await page.locator('#ml-metrics tbody tr').count(),10);
+    for (const model of ['xgboost', 'xgboost_heat', 'hybrid', 'hierarchical']) {
+      await page.selectOption('#ml-model', model);
+      assert.equal(await page.locator('#ml-days tbody tr').count(),22);
+    }
     for (const name of ['MuGrow','IDEAS','Reference','Tomatonuts','Trigger','Agrifusion']) {
       await page.selectOption('#room', name);
       assert.equal(await page.locator('#operations-table tbody tr').count(),13);
@@ -47,12 +52,16 @@ const assert = require('node:assert/strict');
     assert((await page.locator('#journal-table').textContent()).includes('Inspect sensor <test>'));
     assert((await page.locator('#journal-summary').textContent()).includes('80.00'));
     await page.locator('#import-journal').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"version":1,"entries":[{}]}')});
+    await page.waitForFunction(() => document.getElementById('journal-message').textContent === 'Invalid journal backup.');
     assert.equal(await page.locator('#journal-message').textContent(),'Invalid journal backup.');
     await page.locator('#import-journal').setInputFiles({name:'good.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({version:1,entries:[{id:'fixture',room:'MuGrow',date:'2024-11-06',owner:'QA',task:'Imported',status:'Open',pots:0,revenue:0,cost:0}]}))});
+    await page.waitForFunction(() => document.querySelectorAll('#journal-table tbody tr').length === 2);
     assert.equal(await page.locator('#journal-table tbody tr').count(),2);
     await page.evaluate(() => localStorage.removeItem('harvestwindow-journal-v1'));
     await page.reload();
-    await page.screenshot({path:path.resolve(__dirname,'../operations-preview.png'),fullPage:true});
+    if (process.env.HARVESTWINDOW_SCREENSHOT) {
+      await page.screenshot({path:process.env.HARVESTWINDOW_SCREENSHOT,fullPage:true});
+    }
     await page.setViewportSize({width:390,height:844});
     await page.reload();
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Mobile horizontal overflow');

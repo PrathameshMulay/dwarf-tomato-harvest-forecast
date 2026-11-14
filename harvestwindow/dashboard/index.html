@@ -15,6 +15,8 @@
   <script defer src="operations-data.js"></script>
   <script defer src="operations.js"></script>
   <script defer src="journal.js"></script>
+  <script defer src="ml-data.js"></script>
+  <script defer src="ml-comparison.js"></script>
 </head>
 <body>
   <header class="masthead">
@@ -134,6 +136,21 @@
       <div class="table-scroll"><table id="metrics"></table></div>
       <details><summary>See the six room-level predictions</summary><div class="table-scroll"><table id="room-results"></table></div></details>
       <p class="note">The mean baseline has the lowest error on this endpoint. The planners also estimate how ripeness changes day by day so growers can compare harvest dates.</p>
+      <p><a href="#model-comparison">Compare the experimental forecasts</a></p>
+    </section>
+    <section id="model-comparison" class="panel evidence" aria-labelledby="comparison-title">
+      <p class="eyebrow">Experimental forecasts</p><h2 id="comparison-title">Model comparison</h2>
+      <p>November 5 forecasts, scored at recorded harvest across six held-out rooms. Select a greenhouse at the top of the page to compare its 21-day outlook.</p>
+      <div class="table-scroll"><table id="ml-metrics"></table></div>
+      <div class="section-heading"><div><h3 id="ml-room-title"></h3><label>Experimental model <select id="ml-model"></select></label></div><p id="ml-legend"></p></div>
+      <canvas id="ml-chart" role="img" aria-labelledby="ml-room-title ml-legend" style="width:100%;height:260px"></canvas>
+      <p id="ml-actual"></p>
+      <div class="table-scroll"><table id="ml-decisions"></table></div>
+      <details><summary>Daily values, room errors, and feature gain</summary>
+        <p id="ml-gain"></p><div class="table-scroll"><table id="ml-errors"></table></div>
+        <div class="table-scroll channel-history"><table id="ml-days"></table></div>
+      </details>
+      <p class="note">Shading varies training-room composition and future warmth. It has no calibrated probability coverage. Alternate dates and profits are simulated. Experimental forecasts use the no-sample setup. The main planner continues to support crop sampling with the existing logistic model.</p>
     </section>
     <section id="methods" class="panel evidence" aria-labelledby="methods-title">
       <div class="section-heading"><div><p class="eyebrow">Model and assumptions</p><h2 id="methods-title">How the recommendation works</h2></div></div>
