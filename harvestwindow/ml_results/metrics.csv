@@ -1,0 +1,47 @@
+subset,model,n,mae,rmse,bias
+harvest,always,6,7.595,8.646,0.395
+harvest,hierarchical,6,10.627,11.317,0.757
+harvest,hybrid,6,9.45,10.867,-1.977
+harvest,mean,6,7.01,7.97,0.0
+harvest,never,6,8.515,10.078,0.142
+harvest,persistence,6,84.368,84.633,-84.368
+harvest,selective,6,7.957,9.192,-0.417
+harvest,warmth,6,10.517,11.265,0.683
+harvest,xgboost,6,14.208,18.845,-8.575
+harvest,xgboost_heat,6,11.825,15.75,-7.705
+destructive,hierarchical,18,2.337,6.261,1.744
+destructive,hybrid,18,2.865,6.482,1.894
+destructive,never,18,3.291,7.451,2.971
+destructive,warmth,18,2.537,6.429,1.926
+destructive,xgboost,18,4.651,8.175,-1.934
+destructive,xgboost_heat,18,4.227,8.062,-1.982
+12-16 days,always,3,6.83,7.384,0.07
+12-16 days,hierarchical,3,9.32,10.53,-1.227
+12-16 days,hybrid,3,4.207,4.396,0.207
+12-16 days,mean,3,7.01,8.37,-7.01
+12-16 days,never,3,3.72,3.985,2.28
+12-16 days,persistence,3,90.29,90.37,-90.29
+12-16 days,selective,3,3.72,3.985,2.28
+12-16 days,warmth,3,9.083,10.383,-1.423
+12-16 days,xgboost,3,9.52,11.405,-9.52
+12-16 days,xgboost_heat,3,8.853,10.832,-8.853
+6-7 days,always,2,7.62,9.699,6.0
+6-7 days,hierarchical,2,11.005,11.083,11.005
+6-7 days,hybrid,2,15.335,15.342,0.465
+6-7 days,mean,2,7.545,8.237,7.545
+6-7 days,never,2,13.095,13.656,3.875
+6-7 days,persistence,2,77.92,77.96,-77.92
+6-7 days,selective,2,11.42,11.63,2.2
+6-7 days,warmth,2,11.055,11.162,11.055
+6-7 days,xgboost,2,8.45,8.868,8.45
+6-7 days,xgboost_heat,2,6.18,7.433,6.18
+8-11 days,always,1,9.84,9.84,-9.84
+8-11 days,hierarchical,1,13.79,13.79,-13.79
+8-11 days,hybrid,1,13.41,13.41,-13.41
+8-11 days,mean,1,5.94,5.94,5.94
+8-11 days,never,1,13.74,13.74,-13.74
+8-11 days,persistence,1,79.5,79.5,-79.5
+8-11 days,selective,1,13.74,13.74,-13.74
+8-11 days,warmth,1,13.74,13.74,-13.74
+8-11 days,xgboost,1,39.79,39.79,-39.79
+8-11 days,xgboost_heat,1,32.03,32.03,-32.03

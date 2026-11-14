@@ -1,0 +1,9 @@
+model,reference,wins,mean_delta,drop_one_min,drop_one_max
+xgboost_heat,mean,3,4.815,0.56,6.216
+xgboost_heat,never,3,3.31,0.314,5.406
+xgboost,mean,1,7.198,1.868,8.688
+xgboost,never,3,5.693,1.622,7.998
+hybrid,mean,2,2.44,0.802,4.684
+hybrid,never,4,0.935,-0.008,1.548
+hierarchical,mean,2,3.617,2.724,5.926
+hierarchical,never,1,2.112,-0.198,3.99
