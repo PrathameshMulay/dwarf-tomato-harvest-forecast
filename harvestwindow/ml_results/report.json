@@ -1,0 +1,2886 @@
+{
+  "metrics": [
+    {
+      "subset": "harvest",
+      "model": "always",
+      "n": 6,
+      "mae": 7.595,
+      "rmse": 8.646,
+      "bias": 0.395
+    },
+    {
+      "subset": "harvest",
+      "model": "hierarchical",
+      "n": 6,
+      "mae": 10.627,
+      "rmse": 11.317,
+      "bias": 0.757
+    },
+    {
+      "subset": "harvest",
+      "model": "hybrid",
+      "n": 6,
+      "mae": 9.45,
+      "rmse": 10.867,
+      "bias": -1.977
+    },
+    {
+      "subset": "harvest",
+      "model": "mean",
+      "n": 6,
+      "mae": 7.01,
+      "rmse": 7.97,
+      "bias": 0.0
+    },
+    {
+      "subset": "harvest",
+      "model": "never",
+      "n": 6,
+      "mae": 8.515,
+      "rmse": 10.078,
+      "bias": 0.142
+    },
+    {
+      "subset": "harvest",
+      "model": "persistence",
+      "n": 6,
+      "mae": 84.368,
+      "rmse": 84.633,
+      "bias": -84.368
+    },
+    {
+      "subset": "harvest",
+      "model": "selective",
+      "n": 6,
+      "mae": 7.957,
+      "rmse": 9.192,
+      "bias": -0.417
+    },
+    {
+      "subset": "harvest",
+      "model": "warmth",
+      "n": 6,
+      "mae": 10.517,
+      "rmse": 11.265,
+      "bias": 0.683
+    },
+    {
+      "subset": "harvest",
+      "model": "xgboost",
+      "n": 6,
+      "mae": 14.208,
+      "rmse": 18.845,
+      "bias": -8.575
+    },
+    {
+      "subset": "harvest",
+      "model": "xgboost_heat",
+      "n": 6,
+      "mae": 11.825,
+      "rmse": 15.75,
+      "bias": -7.705
+    },
+    {
+      "subset": "destructive",
+      "model": "hierarchical",
+      "n": 18,
+      "mae": 2.337,
+      "rmse": 6.261,
+      "bias": 1.744
+    },
+    {
+      "subset": "destructive",
+      "model": "hybrid",
+      "n": 18,
+      "mae": 2.865,
+      "rmse": 6.482,
+      "bias": 1.894
+    },
+    {
+      "subset": "destructive",
+      "model": "never",
+      "n": 18,
+      "mae": 3.291,
+      "rmse": 7.451,
+      "bias": 2.971
+    },
+    {
+      "subset": "destructive",
+      "model": "warmth",
+      "n": 18,
+      "mae": 2.537,
+      "rmse": 6.429,
+      "bias": 1.926
+    },
+    {
+      "subset": "destructive",
+      "model": "xgboost",
+      "n": 18,
+      "mae": 4.651,
+      "rmse": 8.175,
+      "bias": -1.934
+    },
+    {
+      "subset": "destructive",
+      "model": "xgboost_heat",
+      "n": 18,
+      "mae": 4.227,
+      "rmse": 8.062,
+      "bias": -1.982
+    },
+    {
+      "subset": "12-16 days",
+      "model": "always",
+      "n": 3,
+      "mae": 6.83,
+      "rmse": 7.384,
+      "bias": 0.07
+    },
+    {
+      "subset": "12-16 days",
+      "model": "hierarchical",
+      "n": 3,
+      "mae": 9.32,
+      "rmse": 10.53,
+      "bias": -1.227
+    },
+    {
+      "subset": "12-16 days",
+      "model": "hybrid",
+      "n": 3,
+      "mae": 4.207,
+      "rmse": 4.396,
+      "bias": 0.207
+    },
+    {
+      "subset": "12-16 days",
+      "model": "mean",
+      "n": 3,
+      "mae": 7.01,
+      "rmse": 8.37,
+      "bias": -7.01
+    },
+    {
+      "subset": "12-16 days",
+      "model": "never",
+      "n": 3,
+      "mae": 3.72,
+      "rmse": 3.985,
+      "bias": 2.28
+    },
+    {
+      "subset": "12-16 days",
+      "model": "persistence",
+      "n": 3,
+      "mae": 90.29,
+      "rmse": 90.37,
+      "bias": -90.29
+    },
+    {
+      "subset": "12-16 days",
+      "model": "selective",
+      "n": 3,
+      "mae": 3.72,
+      "rmse": 3.985,
+      "bias": 2.28
+    },
+    {
+      "subset": "12-16 days",
+      "model": "warmth",
+      "n": 3,
+      "mae": 9.083,
+      "rmse": 10.383,
+      "bias": -1.423
+    },
+    {
+      "subset": "12-16 days",
+      "model": "xgboost",
+      "n": 3,
+      "mae": 9.52,
+      "rmse": 11.405,
+      "bias": -9.52
+    },
+    {
+      "subset": "12-16 days",
+      "model": "xgboost_heat",
+      "n": 3,
+      "mae": 8.853,
+      "rmse": 10.832,
+      "bias": -8.853
+    },
+    {
+      "subset": "6-7 days",
+      "model": "always",
+      "n": 2,
+      "mae": 7.62,
+      "rmse": 9.699,
+      "bias": 6.0
+    },
+    {
+      "subset": "6-7 days",
+      "model": "hierarchical",
+      "n": 2,
+      "mae": 11.005,
+      "rmse": 11.083,
+      "bias": 11.005
+    },
+    {
+      "subset": "6-7 days",
+      "model": "hybrid",
+      "n": 2,
+      "mae": 15.335,
+      "rmse": 15.342,
+      "bias": 0.465
+    },
+    {
+      "subset": "6-7 days",
+      "model": "mean",
+      "n": 2,
+      "mae": 7.545,
+      "rmse": 8.237,
+      "bias": 7.545
+    },
+    {
+      "subset": "6-7 days",
+      "model": "never",
+      "n": 2,
+      "mae": 13.095,
+      "rmse": 13.656,
+      "bias": 3.875
+    },
+    {
+      "subset": "6-7 days",
+      "model": "persistence",
+      "n": 2,
+      "mae": 77.92,
+      "rmse": 77.96,
+      "bias": -77.92
+    },
+    {
+      "subset": "6-7 days",
+      "model": "selective",
+      "n": 2,
+      "mae": 11.42,
+      "rmse": 11.63,
+      "bias": 2.2
+    },
+    {
+      "subset": "6-7 days",
+      "model": "warmth",
+      "n": 2,
+      "mae": 11.055,
+      "rmse": 11.162,
+      "bias": 11.055
+    },
+    {
+      "subset": "6-7 days",
+      "model": "xgboost",
+      "n": 2,
+      "mae": 8.45,
+      "rmse": 8.868,
+      "bias": 8.45
+    },
+    {
+      "subset": "6-7 days",
+      "model": "xgboost_heat",
+      "n": 2,
+      "mae": 6.18,
+      "rmse": 7.433,
+      "bias": 6.18
+    },
+    {
+      "subset": "8-11 days",
+      "model": "always",
+      "n": 1,
+      "mae": 9.84,
+      "rmse": 9.84,
+      "bias": -9.84
+    },
+    {
+      "subset": "8-11 days",
+      "model": "hierarchical",
+      "n": 1,
+      "mae": 13.79,
+      "rmse": 13.79,
+      "bias": -13.79
+    },
+    {
+      "subset": "8-11 days",
+      "model": "hybrid",
+      "n": 1,
+      "mae": 13.41,
+      "rmse": 13.41,
+      "bias": -13.41
+    },
+    {
+      "subset": "8-11 days",
+      "model": "mean",
+      "n": 1,
+      "mae": 5.94,
+      "rmse": 5.94,
+      "bias": 5.94
+    },
+    {
+      "subset": "8-11 days",
+      "model": "never",
+      "n": 1,
+      "mae": 13.74,
+      "rmse": 13.74,
+      "bias": -13.74
+    },
+    {
+      "subset": "8-11 days",
+      "model": "persistence",
+      "n": 1,
+      "mae": 79.5,
+      "rmse": 79.5,
+      "bias": -79.5
+    },
+    {
+      "subset": "8-11 days",
+      "model": "selective",
+      "n": 1,
+      "mae": 13.74,
+      "rmse": 13.74,
+      "bias": -13.74
+    },
+    {
+      "subset": "8-11 days",
+      "model": "warmth",
+      "n": 1,
+      "mae": 13.74,
+      "rmse": 13.74,
+      "bias": -13.74
+    },
+    {
+      "subset": "8-11 days",
+      "model": "xgboost",
+      "n": 1,
+      "mae": 39.79,
+      "rmse": 39.79,
+      "bias": -39.79
+    },
+    {
+      "subset": "8-11 days",
+      "model": "xgboost_heat",
+      "n": 1,
+      "mae": 32.03,
+      "rmse": 32.03,
+      "bias": -32.03
+    }
+  ],
+  "paired": [
+    {
+      "model": "xgboost_heat",
+      "reference": "mean",
+      "wins": 3,
+      "mean_delta": 4.815,
+      "drop_one_min": 0.56,
+      "drop_one_max": 6.216
+    },
+    {
+      "model": "xgboost_heat",
+      "reference": "never",
+      "wins": 3,
+      "mean_delta": 3.31,
+      "drop_one_min": 0.314,
+      "drop_one_max": 5.406
+    },
+    {
+      "model": "xgboost",
+      "reference": "mean",
+      "wins": 1,
+      "mean_delta": 7.198,
+      "drop_one_min": 1.868,
+      "drop_one_max": 8.688
+    },
+    {
+      "model": "xgboost",
+      "reference": "never",
+      "wins": 3,
+      "mean_delta": 5.693,
+      "drop_one_min": 1.622,
+      "drop_one_max": 7.998
+    },
+    {
+      "model": "hybrid",
+      "reference": "mean",
+      "wins": 2,
+      "mean_delta": 2.44,
+      "drop_one_min": 0.802,
+      "drop_one_max": 4.684
+    },
+    {
+      "model": "hybrid",
+      "reference": "never",
+      "wins": 4,
+      "mean_delta": 0.935,
+      "drop_one_min": -0.008,
+      "drop_one_max": 1.548
+    },
+    {
+      "model": "hierarchical",
+      "reference": "mean",
+      "wins": 2,
+      "mean_delta": 3.617,
+      "drop_one_min": 2.724,
+      "drop_one_max": 5.926
+    },
+    {
+      "model": "hierarchical",
+      "reference": "never",
+      "wins": 1,
+      "mean_delta": 2.112,
+      "drop_one_min": -0.198,
+      "drop_one_max": 3.99
+    }
+  ],
+  "scores": [
+    {
+      "room": "Agrifusion",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.46,
+      "error": 0.46,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.46,
+      "error": 0.46,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 21.88,
+      "prediction": 18.51,
+      "error": -3.37,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-11-05",
+      "date": "2024-11-20",
+      "horizon": 15,
+      "model": "xgboost_heat",
+      "actual": 85.21,
+      "prediction": 85.1,
+      "error": -0.11,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 0.69,
+      "error": 0.69,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 0.69,
+      "error": 0.69,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 21.88,
+      "prediction": 17.67,
+      "error": -4.21,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-11-05",
+      "date": "2024-11-20",
+      "horizon": 15,
+      "model": "xgboost",
+      "actual": 85.21,
+      "prediction": 84.55,
+      "error": -0.66,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 0.0,
+      "error": 0.0,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 0.0,
+      "error": 0.0,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 21.88,
+      "prediction": 17.94,
+      "error": -3.94,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-11-05",
+      "date": "2024-11-20",
+      "horizon": 15,
+      "model": "hybrid",
+      "actual": 85.21,
+      "prediction": 88.69,
+      "error": 3.48,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 0.01,
+      "error": 0.01,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 0.38,
+      "error": 0.38,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 21.88,
+      "prediction": 21.84,
+      "error": -0.04,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-11-05",
+      "date": "2024-11-20",
+      "horizon": 15,
+      "model": "hierarchical",
+      "actual": 85.21,
+      "prediction": 93.36,
+      "error": 8.15,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 0.01,
+      "error": 0.01,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 0.01,
+      "error": 0.01,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 0.4,
+      "error": 0.4,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 0.4,
+      "error": 0.4,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 21.88,
+      "prediction": 21.91,
+      "error": 0.03,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "never",
+      "actual": 21.88,
+      "prediction": 21.91,
+      "error": 0.03,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-11-05",
+      "date": "2024-11-20",
+      "horizon": 15,
+      "model": "mean",
+      "actual": 85.21,
+      "prediction": 84.3,
+      "error": -0.91,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-11-05",
+      "date": "2024-11-20",
+      "horizon": 15,
+      "model": "persistence",
+      "actual": 85.21,
+      "prediction": 0.0,
+      "error": -85.21,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-11-05",
+      "date": "2024-11-20",
+      "horizon": 15,
+      "model": "warmth",
+      "actual": 85.21,
+      "prediction": 93.08,
+      "error": 7.87,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-11-05",
+      "date": "2024-11-20",
+      "horizon": 15,
+      "model": "never",
+      "actual": 85.21,
+      "prediction": 90.82,
+      "error": 5.61,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-11-05",
+      "date": "2024-11-20",
+      "horizon": 15,
+      "model": "selective",
+      "actual": 85.21,
+      "prediction": 90.82,
+      "error": 5.61,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Agrifusion",
+      "origin": "2024-11-05",
+      "date": "2024-11-20",
+      "horizon": 15,
+      "model": "always",
+      "actual": 85.21,
+      "prediction": 92.28,
+      "error": 7.07,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.45,
+      "error": 0.45,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.49,
+      "prediction": 0.45,
+      "error": -0.04,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 40.19,
+      "prediction": 55.29,
+      "error": 15.1,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-11-05",
+      "date": "2024-11-12",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 80.92,
+      "prediction": 82.97,
+      "error": 2.05,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 1.07,
+      "error": 1.07,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.49,
+      "prediction": 1.32,
+      "error": 0.83,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 40.19,
+      "prediction": 54.16,
+      "error": 13.97,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-11-05",
+      "date": "2024-11-12",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 80.92,
+      "prediction": 86.68,
+      "error": 5.76,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 0.0,
+      "error": 0.0,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.49,
+      "prediction": 0.0,
+      "error": -0.49,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 40.19,
+      "prediction": 64.19,
+      "error": 24.0,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-11-05",
+      "date": "2024-11-12",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 80.92,
+      "prediction": 66.05,
+      "error": -14.87,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.49,
+      "prediction": 1.68,
+      "error": 1.19,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 40.19,
+      "prediction": 65.85,
+      "error": 25.66,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-11-05",
+      "date": "2024-11-12",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 80.92,
+      "prediction": 93.24,
+      "error": 12.32,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.49,
+      "prediction": 1.59,
+      "error": 1.1,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.49,
+      "prediction": 1.59,
+      "error": 1.1,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 40.19,
+      "prediction": 66.2,
+      "error": 26.01,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "never",
+      "actual": 40.19,
+      "prediction": 66.2,
+      "error": 26.01,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-11-05",
+      "date": "2024-11-12",
+      "horizon": 7,
+      "model": "mean",
+      "actual": 80.92,
+      "prediction": 85.16,
+      "error": 4.24,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-11-05",
+      "date": "2024-11-12",
+      "horizon": 7,
+      "model": "persistence",
+      "actual": 80.92,
+      "prediction": 0.49,
+      "error": -80.43,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-11-05",
+      "date": "2024-11-12",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 80.92,
+      "prediction": 93.52,
+      "error": 12.6,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-11-05",
+      "date": "2024-11-12",
+      "horizon": 7,
+      "model": "never",
+      "actual": 80.92,
+      "prediction": 71.7,
+      "error": -9.22,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-11-05",
+      "date": "2024-11-12",
+      "horizon": 7,
+      "model": "selective",
+      "actual": 80.92,
+      "prediction": 71.7,
+      "error": -9.22,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "IDEAS",
+      "origin": "2024-11-05",
+      "date": "2024-11-12",
+      "horizon": 7,
+      "model": "always",
+      "actual": 80.92,
+      "prediction": 79.3,
+      "error": -1.62,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.45,
+      "error": 0.45,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.45,
+      "error": 0.45,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 55.3,
+      "prediction": 28.82,
+      "error": -26.48,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-11-05",
+      "date": "2024-11-11",
+      "horizon": 6,
+      "model": "xgboost_heat",
+      "actual": 75.41,
+      "prediction": 85.72,
+      "error": 10.31,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 1.38,
+      "error": 1.38,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 1.38,
+      "error": 1.38,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 55.3,
+      "prediction": 28.65,
+      "error": -26.65,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-11-05",
+      "date": "2024-11-11",
+      "horizon": 6,
+      "model": "xgboost",
+      "actual": 75.41,
+      "prediction": 86.55,
+      "error": 11.14,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 0.0,
+      "error": 0.0,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 0.32,
+      "error": 0.32,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 55.3,
+      "prediction": 67.03,
+      "error": 11.73,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-11-05",
+      "date": "2024-11-11",
+      "horizon": 6,
+      "model": "hybrid",
+      "actual": 75.41,
+      "prediction": 91.21,
+      "error": 15.8,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 1.45,
+      "error": 1.45,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 55.3,
+      "prediction": 52.7,
+      "error": -2.6,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-11-05",
+      "date": "2024-11-11",
+      "horizon": 6,
+      "model": "hierarchical",
+      "actual": 75.41,
+      "prediction": 85.1,
+      "error": 9.69,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 1.5,
+      "error": 1.5,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 1.5,
+      "error": 1.5,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 55.3,
+      "prediction": 52.68,
+      "error": -2.62,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "never",
+      "actual": 55.3,
+      "prediction": 71.49,
+      "error": 16.19,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-11-05",
+      "date": "2024-11-11",
+      "horizon": 6,
+      "model": "mean",
+      "actual": 75.41,
+      "prediction": 86.26,
+      "error": 10.85,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-11-05",
+      "date": "2024-11-11",
+      "horizon": 6,
+      "model": "persistence",
+      "actual": 75.41,
+      "prediction": 0.0,
+      "error": -75.41,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-11-05",
+      "date": "2024-11-11",
+      "horizon": 6,
+      "model": "warmth",
+      "actual": 75.41,
+      "prediction": 84.92,
+      "error": 9.51,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-11-05",
+      "date": "2024-11-11",
+      "horizon": 6,
+      "model": "never",
+      "actual": 75.41,
+      "prediction": 92.38,
+      "error": 16.97,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-11-05",
+      "date": "2024-11-11",
+      "horizon": 6,
+      "model": "selective",
+      "actual": 75.41,
+      "prediction": 89.03,
+      "error": 13.62,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "MuGrow",
+      "origin": "2024-11-05",
+      "date": "2024-11-11",
+      "horizon": 6,
+      "model": "always",
+      "actual": 75.41,
+      "prediction": 89.03,
+      "error": 13.62,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.5,
+      "error": 0.5,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.5,
+      "error": 0.5,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 18.82,
+      "prediction": 9.63,
+      "error": -9.19,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-11-05",
+      "date": "2024-11-15",
+      "horizon": 10,
+      "model": "xgboost_heat",
+      "actual": 79.5,
+      "prediction": 47.47,
+      "error": -32.03,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 0.73,
+      "error": 0.73,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 0.73,
+      "error": 0.73,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 18.82,
+      "prediction": 8.65,
+      "error": -10.17,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-11-05",
+      "date": "2024-11-15",
+      "horizon": 10,
+      "model": "xgboost",
+      "actual": 79.5,
+      "prediction": 39.71,
+      "error": -39.79,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 0.35,
+      "error": 0.35,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 0.78,
+      "error": 0.78,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 18.82,
+      "prediction": 16.27,
+      "error": -2.55,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-11-05",
+      "date": "2024-11-15",
+      "horizon": 10,
+      "model": "hybrid",
+      "actual": 79.5,
+      "prediction": 66.09,
+      "error": -13.41,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 0.46,
+      "error": 0.46,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 18.82,
+      "prediction": 16.12,
+      "error": -2.7,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-11-05",
+      "date": "2024-11-15",
+      "horizon": 10,
+      "model": "hierarchical",
+      "actual": 79.5,
+      "prediction": 65.71,
+      "error": -13.79,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 0.44,
+      "error": 0.44,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 0.44,
+      "error": 0.44,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 18.82,
+      "prediction": 15.94,
+      "error": -2.88,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "never",
+      "actual": 18.82,
+      "prediction": 15.94,
+      "error": -2.88,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-11-05",
+      "date": "2024-11-15",
+      "horizon": 10,
+      "model": "mean",
+      "actual": 79.5,
+      "prediction": 85.44,
+      "error": 5.94,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-11-05",
+      "date": "2024-11-15",
+      "horizon": 10,
+      "model": "persistence",
+      "actual": 79.5,
+      "prediction": 0.0,
+      "error": -79.5,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-11-05",
+      "date": "2024-11-15",
+      "horizon": 10,
+      "model": "warmth",
+      "actual": 79.5,
+      "prediction": 65.76,
+      "error": -13.74,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-11-05",
+      "date": "2024-11-15",
+      "horizon": 10,
+      "model": "never",
+      "actual": 79.5,
+      "prediction": 65.76,
+      "error": -13.74,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-11-05",
+      "date": "2024-11-15",
+      "horizon": 10,
+      "model": "selective",
+      "actual": 79.5,
+      "prediction": 65.76,
+      "error": -13.74,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Reference",
+      "origin": "2024-11-05",
+      "date": "2024-11-15",
+      "horizon": 10,
+      "model": "always",
+      "actual": 79.5,
+      "prediction": 69.66,
+      "error": -9.84,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.34,
+      "error": 0.34,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.34,
+      "error": 0.34,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 29.33,
+      "prediction": 21.73,
+      "error": -7.6,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "xgboost_heat",
+      "actual": 94.38,
+      "prediction": 82.2,
+      "error": -12.18,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 0.94,
+      "error": 0.94,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 0.94,
+      "error": 0.94,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 29.33,
+      "prediction": 20.32,
+      "error": -9.01,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "xgboost",
+      "actual": 94.38,
+      "prediction": 80.98,
+      "error": -13.4,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 0.0,
+      "error": 0.0,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 2.35,
+      "error": 2.35,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 29.33,
+      "prediction": 32.63,
+      "error": 3.3,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "hybrid",
+      "actual": 94.38,
+      "prediction": 97.52,
+      "error": 3.14,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 1.15,
+      "error": 1.15,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 29.33,
+      "prediction": 34.56,
+      "error": 5.23,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "hierarchical",
+      "actual": 94.38,
+      "prediction": 98.37,
+      "error": 3.99,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 0.03,
+      "error": 0.03,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 0.03,
+      "error": 0.03,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 1.49,
+      "error": 1.49,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 1.49,
+      "error": 1.49,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 29.33,
+      "prediction": 35.79,
+      "error": 6.46,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "never",
+      "actual": 29.33,
+      "prediction": 35.79,
+      "error": 6.46,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "mean",
+      "actual": 94.38,
+      "prediction": 82.46,
+      "error": -11.92,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "persistence",
+      "actual": 94.38,
+      "prediction": 0.0,
+      "error": -94.38,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "warmth",
+      "actual": 94.38,
+      "prediction": 98.0,
+      "error": 3.62,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "never",
+      "actual": 94.38,
+      "prediction": 97.77,
+      "error": 3.39,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "selective",
+      "actual": 94.38,
+      "prediction": 97.77,
+      "error": 3.39,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Tomatonuts",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "always",
+      "actual": 94.38,
+      "prediction": 97.66,
+      "error": 3.28,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.58,
+      "error": 0.58,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 0.0,
+      "prediction": 0.58,
+      "error": 0.58,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost_heat",
+      "actual": 9.78,
+      "prediction": 0.58,
+      "error": -9.2,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "xgboost_heat",
+      "actual": 91.28,
+      "prediction": 77.01,
+      "error": -14.27,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 0.55,
+      "error": 0.55,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 0.0,
+      "prediction": 0.55,
+      "error": 0.55,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "xgboost",
+      "actual": 9.78,
+      "prediction": 0.55,
+      "error": -9.23,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "xgboost",
+      "actual": 91.28,
+      "prediction": 76.78,
+      "error": -14.5,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 0.0,
+      "error": 0.0,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 0.0,
+      "prediction": 0.0,
+      "error": 0.0,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hybrid",
+      "actual": 9.78,
+      "prediction": 8.02,
+      "error": -1.76,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "hybrid",
+      "actual": 91.28,
+      "prediction": 85.28,
+      "error": -6.0,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 0.02,
+      "error": 0.02,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 0.0,
+      "prediction": 0.4,
+      "error": 0.4,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "hierarchical",
+      "actual": 9.78,
+      "prediction": 10.48,
+      "error": 0.7,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "hierarchical",
+      "actual": 91.28,
+      "prediction": 75.46,
+      "error": -15.82,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 0.03,
+      "error": 0.03,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-09-30",
+      "date": "2024-10-07",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 0.03,
+      "error": 0.03,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 0.0,
+      "prediction": 0.52,
+      "error": 0.52,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-15",
+      "date": "2024-10-22",
+      "horizon": 7,
+      "model": "never",
+      "actual": 0.0,
+      "prediction": 0.52,
+      "error": 0.52,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "warmth",
+      "actual": 9.78,
+      "prediction": 11.86,
+      "error": 2.08,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-10-29",
+      "date": "2024-11-05",
+      "horizon": 7,
+      "model": "never",
+      "actual": 9.78,
+      "prediction": 11.86,
+      "error": 2.08,
+      "endpoint": "destructive"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "mean",
+      "actual": 91.28,
+      "prediction": 83.08,
+      "error": -8.2,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "persistence",
+      "actual": 91.28,
+      "prediction": 0.0,
+      "error": -91.28,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "warmth",
+      "actual": 91.28,
+      "prediction": 75.52,
+      "error": -15.76,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "never",
+      "actual": 91.28,
+      "prediction": 89.12,
+      "error": -2.16,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "selective",
+      "actual": 91.28,
+      "prediction": 89.12,
+      "error": -2.16,
+      "endpoint": "harvest"
+    },
+    {
+      "room": "Trigger",
+      "origin": "2024-11-05",
+      "date": "2024-11-21",
+      "horizon": 16,
+      "model": "always",
+      "actual": 91.28,
+      "prediction": 81.14,
+      "error": -10.14,
+      "endpoint": "harvest"
+    }
+  ],
+  "decisions": [
+    {
+      "room": "Agrifusion",
+      "model": "never",
+      "action": "wait",
+      "selected": "2024-11-14",
+      "shift_days": 0,
+      "simulated_profit": 0.2645,
+      "first_50": "2024-11-12",
+      "first_70": "2024-11-15",
+      "first_85": "2024-11-18"
+    },
+    {
+      "room": "Agrifusion",
+      "model": "xgboost_heat",
+      "action": "wait",
+      "selected": "2024-11-14",
+      "shift_days": 0,
+      "simulated_profit": 0.268,
+      "first_50": "2024-11-14",
+      "first_70": "2024-11-14",
+      "first_85": "2024-11-19"
+    },
+    {
+      "room": "Agrifusion",
+      "model": "xgboost",
+      "action": "wait",
+      "selected": "2024-11-11",
+      "shift_days": -3,
+      "simulated_profit": 0.2637,
+      "first_50": "2024-11-11",
+      "first_70": "2024-11-14",
+      "first_85": null
+    },
+    {
+      "room": "Agrifusion",
+      "model": "hybrid",
+      "action": "wait",
+      "selected": "2024-11-14",
+      "shift_days": 0,
+      "simulated_profit": 0.2602,
+      "first_50": "2024-11-12",
+      "first_70": "2024-11-15",
+      "first_85": "2024-11-19"
+    },
+    {
+      "room": "Agrifusion",
+      "model": "hierarchical",
+      "action": "wait",
+      "selected": "2024-11-13",
+      "shift_days": -1,
+      "simulated_profit": 0.2733,
+      "first_50": "2024-11-11",
+      "first_70": "2024-11-14",
+      "first_85": "2024-11-17"
+    },
+    {
+      "room": "IDEAS",
+      "model": "never",
+      "action": "wait",
+      "selected": "2024-11-11",
+      "shift_days": 0,
+      "simulated_profit": 0.5457,
+      "first_50": "2024-11-09",
+      "first_70": "2024-11-12",
+      "first_85": "2024-11-15"
+    },
+    {
+      "room": "IDEAS",
+      "model": "xgboost_heat",
+      "action": "wait",
+      "selected": "2024-11-07",
+      "shift_days": -4,
+      "simulated_profit": 0.6233,
+      "first_50": "2024-11-05",
+      "first_70": "2024-11-07",
+      "first_85": "2024-11-14"
+    },
+    {
+      "room": "IDEAS",
+      "model": "xgboost",
+      "action": "sample",
+      "selected": "2024-11-05",
+      "shift_days": -6,
+      "simulated_profit": 0.6265,
+      "first_50": "2024-11-05",
+      "first_70": "2024-11-07",
+      "first_85": "2024-11-07"
+    },
+    {
+      "room": "IDEAS",
+      "model": "hybrid",
+      "action": "wait",
+      "selected": "2024-11-12",
+      "shift_days": 1,
+      "simulated_profit": 0.5319,
+      "first_50": "2024-11-10",
+      "first_70": "2024-11-13",
+      "first_85": "2024-11-17"
+    },
+    {
+      "room": "IDEAS",
+      "model": "hierarchical",
+      "action": "sample",
+      "selected": "2024-11-06",
+      "shift_days": -5,
+      "simulated_profit": 0.6396,
+      "first_50": "2024-11-05",
+      "first_70": "2024-11-07",
+      "first_85": "2024-11-10"
+    },
+    {
+      "room": "MuGrow",
+      "model": "never",
+      "action": "sample",
+      "selected": "2024-11-05",
+      "shift_days": 0,
+      "simulated_profit": 0.3779,
+      "first_50": "2024-11-05",
+      "first_70": "2024-11-06",
+      "first_85": "2024-11-09"
+    },
+    {
+      "room": "MuGrow",
+      "model": "xgboost_heat",
+      "action": "wait",
+      "selected": "2024-11-08",
+      "shift_days": 3,
+      "simulated_profit": 0.3436,
+      "first_50": "2024-11-08",
+      "first_70": "2024-11-08",
+      "first_85": "2024-11-11"
+    },
+    {
+      "room": "MuGrow",
+      "model": "xgboost",
+      "action": "wait",
+      "selected": "2024-11-08",
+      "shift_days": 3,
+      "simulated_profit": 0.3436,
+      "first_50": "2024-11-08",
+      "first_70": "2024-11-08",
+      "first_85": "2024-11-11"
+    },
+    {
+      "room": "MuGrow",
+      "model": "hybrid",
+      "action": "harvest",
+      "selected": "2024-11-05",
+      "shift_days": 0,
+      "simulated_profit": 0.3753,
+      "first_50": "2024-11-05",
+      "first_70": "2024-11-06",
+      "first_85": "2024-11-09"
+    },
+    {
+      "room": "MuGrow",
+      "model": "hierarchical",
+      "action": "wait",
+      "selected": "2024-11-08",
+      "shift_days": 3,
+      "simulated_profit": 0.3424,
+      "first_50": "2024-11-05",
+      "first_70": "2024-11-08",
+      "first_85": "2024-11-11"
+    },
+    {
+      "room": "Reference",
+      "model": "never",
+      "action": "wait",
+      "selected": "2024-11-15",
+      "shift_days": 0,
+      "simulated_profit": 0.2396,
+      "first_50": "2024-11-13",
+      "first_70": "2024-11-16",
+      "first_85": "2024-11-20"
+    },
+    {
+      "room": "Reference",
+      "model": "xgboost_heat",
+      "action": "wait",
+      "selected": "2024-11-18",
+      "shift_days": 3,
+      "simulated_profit": 0.2252,
+      "first_50": "2024-11-18",
+      "first_70": "2024-11-18",
+      "first_85": "2024-11-22"
+    },
+    {
+      "room": "Reference",
+      "model": "xgboost",
+      "action": "wait",
+      "selected": "2024-11-18",
+      "shift_days": 3,
+      "simulated_profit": 0.2106,
+      "first_50": "2024-11-18",
+      "first_70": null,
+      "first_85": null
+    },
+    {
+      "room": "Reference",
+      "model": "hybrid",
+      "action": "wait",
+      "selected": "2024-11-15",
+      "shift_days": 0,
+      "simulated_profit": 0.2404,
+      "first_50": "2024-11-13",
+      "first_70": "2024-11-16",
+      "first_85": "2024-11-20"
+    },
+    {
+      "room": "Reference",
+      "model": "hierarchical",
+      "action": "wait",
+      "selected": "2024-11-15",
+      "shift_days": 0,
+      "simulated_profit": 0.2395,
+      "first_50": "2024-11-13",
+      "first_70": "2024-11-16",
+      "first_85": "2024-11-20"
+    },
+    {
+      "room": "Tomatonuts",
+      "model": "never",
+      "action": "wait",
+      "selected": "2024-11-10",
+      "shift_days": 0,
+      "simulated_profit": 0.2305,
+      "first_50": "2024-11-08",
+      "first_70": "2024-11-11",
+      "first_85": "2024-11-14"
+    },
+    {
+      "room": "Tomatonuts",
+      "model": "xgboost_heat",
+      "action": "wait",
+      "selected": "2024-11-10",
+      "shift_days": 0,
+      "simulated_profit": 0.2379,
+      "first_50": "2024-11-10",
+      "first_70": "2024-11-10",
+      "first_85": null
+    },
+    {
+      "room": "Tomatonuts",
+      "model": "xgboost",
+      "action": "wait",
+      "selected": "2024-11-10",
+      "shift_days": 0,
+      "simulated_profit": 0.2379,
+      "first_50": "2024-11-08",
+      "first_70": "2024-11-10",
+      "first_85": null
+    },
+    {
+      "room": "Tomatonuts",
+      "model": "hybrid",
+      "action": "wait",
+      "selected": "2024-11-10",
+      "shift_days": 0,
+      "simulated_profit": 0.2299,
+      "first_50": "2024-11-08",
+      "first_70": "2024-11-11",
+      "first_85": "2024-11-14"
+    },
+    {
+      "room": "Tomatonuts",
+      "model": "hierarchical",
+      "action": "wait",
+      "selected": "2024-11-09",
+      "shift_days": -1,
+      "simulated_profit": 0.2406,
+      "first_50": "2024-11-07",
+      "first_70": "2024-11-10",
+      "first_85": "2024-11-13"
+    },
+    {
+      "room": "Trigger",
+      "model": "never",
+      "action": "wait",
+      "selected": "2024-11-14",
+      "shift_days": 0,
+      "simulated_profit": 0.335,
+      "first_50": "2024-11-11",
+      "first_70": "2024-11-15",
+      "first_85": "2024-11-20"
+    },
+    {
+      "room": "Trigger",
+      "model": "xgboost_heat",
+      "action": "wait",
+      "selected": "2024-11-19",
+      "shift_days": 5,
+      "simulated_profit": 0.2991,
+      "first_50": "2024-11-19",
+      "first_70": "2024-11-19",
+      "first_85": "2024-11-26"
+    },
+    {
+      "room": "Trigger",
+      "model": "xgboost",
+      "action": "wait",
+      "selected": "2024-11-19",
+      "shift_days": 5,
+      "simulated_profit": 0.2991,
+      "first_50": "2024-11-16",
+      "first_70": "2024-11-19",
+      "first_85": "2024-11-26"
+    },
+    {
+      "room": "Trigger",
+      "model": "hybrid",
+      "action": "wait",
+      "selected": "2024-11-15",
+      "shift_days": 1,
+      "simulated_profit": 0.3272,
+      "first_50": "2024-11-12",
+      "first_70": "2024-11-16",
+      "first_85": "2024-11-21"
+    },
+    {
+      "room": "Trigger",
+      "model": "hierarchical",
+      "action": "wait",
+      "selected": "2024-11-19",
+      "shift_days": 5,
+      "simulated_profit": 0.2909,
+      "first_50": "2024-11-16",
+      "first_70": "2024-11-20",
+      "first_85": "2024-11-24"
+    }
+  ],
+  "fits": [
+    {
+      "room": "Agrifusion",
+      "model": "xgboost_heat",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.16618221998214722
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Agrifusion",
+      "model": "xgboost",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.1986381858587265,
+        "dli7": 0.0020271195098757744,
+        "rh7": 0.0016570121515542269,
+        "red": 0.7948564291000366,
+        "onset_age": 0.009302648715674877
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Agrifusion",
+      "model": "hybrid",
+      "parameter": 48,
+      "gain": {
+        "gdd": 0.004082871600985527,
+        "temp7": 0.012390289455652237,
+        "rh7": 0.004330833908170462,
+        "co2_7": 0.012586998753249645,
+        "red": 0.0043526338413357735
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Agrifusion",
+      "model": "hierarchical",
+      "parameter": 0.05,
+      "gain": {},
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "IDEAS",
+      "model": "xgboost_heat",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.16971534490585327
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "IDEAS",
+      "model": "xgboost",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.2731292247772217,
+        "dli7": 0.0019401934696361423,
+        "rh7": 0.00147867645137012,
+        "red": 0.002014682861045003,
+        "onset_age": 0.010300434194505215
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "IDEAS",
+      "model": "hybrid",
+      "parameter": 24,
+      "gain": {
+        "dli7": 0.004755685571581125,
+        "temp7": 0.007832849398255348,
+        "rh7": 0.003636408830061555,
+        "red": 0.008409630507230759
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "IDEAS",
+      "model": "hierarchical",
+      "parameter": 0.5,
+      "gain": {},
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "MuGrow",
+      "model": "xgboost_heat",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.1695438176393509
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "MuGrow",
+      "model": "xgboost",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.19592691957950592,
+        "rh7": 0.0016185971908271313,
+        "red": 0.002138749463483691
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "MuGrow",
+      "model": "hybrid",
+      "parameter": 24,
+      "gain": {
+        "temp7": 0.011671775951981544,
+        "co2_7": 0.01045810803771019
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "MuGrow",
+      "model": "hierarchical",
+      "parameter": 0.05,
+      "gain": {},
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Reference",
+      "model": "xgboost_heat",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.17015433311462402
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Reference",
+      "model": "xgboost",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.18503865599632263,
+        "dli7": 0.0018384428694844246,
+        "rh7": 0.0015723881078884006,
+        "red": 0.5957611203193665,
+        "onset_age": 0.017480116337537766
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Reference",
+      "model": "hybrid",
+      "parameter": 24,
+      "gain": {
+        "temp7": 0.009788358584046364,
+        "co2_7": 0.006301673129200935
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Reference",
+      "model": "hierarchical",
+      "parameter": 0.05,
+      "gain": {},
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Tomatonuts",
+      "model": "xgboost_heat",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.1595216542482376
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Tomatonuts",
+      "model": "xgboost",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.19011308252811432,
+        "dli7": 0.0014201103476807475,
+        "temp7": 0.0009506849455647171,
+        "red": 0.6521744728088379,
+        "onset_age": 0.004322199150919914
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Tomatonuts",
+      "model": "hybrid",
+      "parameter": 24,
+      "gain": {
+        "temp7": 0.017941830679774284,
+        "co2_7": 0.01601686328649521
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Tomatonuts",
+      "model": "hierarchical",
+      "parameter": 0.05,
+      "gain": {},
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Trigger",
+      "model": "xgboost_heat",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.16030769050121307
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Trigger",
+      "model": "xgboost",
+      "parameter": 96,
+      "gain": {
+        "gdd": 0.13890762627124786,
+        "co2_7": 0.0015404060250148177,
+        "red": 0.5413432717323303
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Trigger",
+      "model": "hybrid",
+      "parameter": 24,
+      "gain": {
+        "temp7": 0.013752587139606476,
+        "rh7": 0.00882752425968647,
+        "co2_7": 0.017999637871980667
+      },
+      "raw_decreasing_steps": 0
+    },
+    {
+      "room": "Trigger",
+      "model": "hierarchical",
+      "parameter": 0.05,
+      "gain": {},
+      "raw_decreasing_steps": 0
+    }
+  ],
+  "missing": {
+    "gdd": 0,
+    "dli7": 0,
+    "temp7": 0,
+    "rh7": 0,
+    "co2_7": 0,
+    "red": 0,
+    "onset_age": 18
+  },
+  "labels": 24,
+  "baseline_mae": {
+    "mean": 7.01,
+    "persistence": 84.37,
+    "warmth": 10.52,
+    "never": 8.51,
+    "selective": 7.96,
+    "always": 7.6
+  },
+  "sources": {
+    "archive_sha256": "19bfddf994ffeeb6eff8c20da14af8ae09956d23d7c6d85d7e5aa017cff3f7b1",
+    "camera_sha256": "d0dfa2928a5df1dc5bd7ef08f1bf8b2f8da77ff9809e01072d9271da7249d28f"
+  },
+  "versions": {
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "xgboost": "3.1.3",
+    "pandas": "3.0.1"
+  }
+}

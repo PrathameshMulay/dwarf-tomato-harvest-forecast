@@ -31,8 +31,8 @@ def load_climate(archive):
     climate, harvest = {}, {}
     for room in ROOMS.values():
         member = f"{PREFIX}timeseries/{room.lower()}.csv"
-        with archive.open(member) as stream:
-            data = pd.read_csv(stream, usecols=["time", TEMPERATURE, DENSITY, HARVEST, *COSTS])
+        data = pd.read_csv(io.BytesIO(archive.read(member)),
+                           usecols=["time", TEMPERATURE, DENSITY, HARVEST, *COSTS])
         # Logs contain local wall time and the offset in effect for that record.
         data["date"] = data["time"].str.slice(0, 10)
         harvest[room] = date.fromisoformat(data.loc[data[HARVEST].notna(), "date"].iloc[0])

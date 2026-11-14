@@ -24,8 +24,11 @@ class Curve:
     midpoint: float
 
     def predict(self, heat):
-        exponent = np.clip(-self.slope * (np.asarray(heat) - self.midpoint), -60, 60)
+        exponent = np.clip(-self.log_odds(heat), -60, 60)
         return 1 / (1 + np.exp(exponent))
+
+    def log_odds(self, heat):
+        return self.slope * (np.asarray(heat) - self.midpoint)
 
     def anchored(self, heat, measured, weight=0.65):
         bounded = np.clip(measured, 0.01, 0.99)
@@ -104,7 +107,7 @@ def plan(curve, scenarios, day, inputs, fruit_weight):
 
     def project(ripening_curve, heat_rate, future_cost, price):
         ripeness = ripening_curve.predict(inputs["heat"] + heat_rate * horizon)
-        log_odds = ripening_curve.slope * (inputs["heat"] + heat_rate * horizon - ripening_curve.midpoint)
+        log_odds = ripening_curve.log_odds(inputs["heat"] + heat_rate * horizon)
         red = 1 / (1 + np.exp(-np.clip(log_odds[:, None] + pot_offsets, -60, 60)))
         grams = fruit_weight * red
         sellable = (red >= SELLABLE_RED_PROXY) & (grams >= MIN_RED_GRAMS)

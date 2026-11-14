@@ -15,15 +15,20 @@
   <script defer src="operations-data.js"></script>
   <script defer src="operations.js"></script>
   <script defer src="journal.js"></script>
+  <script defer src="ml-data.js"></script>
+  <script defer src="ml-comparison.js"></script>
+  <script defer src="market.js"></script>
+  <script defer src="market-ui.js"></script>
+  <script defer src="workspace.js"></script>
 </head>
 <body>
   <header class="masthead">
     <a class="brand" href="#planner"><span class="brand-mark" aria-hidden="true">✦</span> HarvestWindow</a>
-    <nav aria-label="Sections"><a href="#planner">Planner</a><a href="#orders">Orders</a><a href="#operations">Operations</a><a href="#journal">Tasks</a><a href="#evidence">Backtest</a></nav>
+    <nav aria-label="Grower workspace"><a href="#planner">Harvest</a><a href="#market">Ship</a><a href="#orders">Orders</a><a href="#operations">Crop checks</a><a href="#journal">Tasks</a><a href="#evidence">Forecast results</a></nav>
   </header>
   <main id="planner">
     <div class="intro">
-      <div><p class="eyebrow">Dwarf tomato · Greenhouse harvest planner</p><h1>Is it time to harvest?</h1></div>
+      <div><p class="eyebrow">Potted dwarf tomatoes</p><h1 id="workspace-title">Is it time to harvest?</h1></div>
       <label class="room-control">Greenhouse <select id="room"></select></label>
     </div>
     <div class="workspace">
@@ -76,6 +81,34 @@
       <p id="risk-summary"></p><p id="sample-value"></p>
       <details><summary>Compare all candidate days</summary><div class="table-scroll"><table id="economics-table"><thead><tr><th>Date</th><th>Sales</th><th>Future costs</th><th>Space cost</th><th>Value vs today</th><th>Sellable</th></tr></thead><tbody></tbody></table></div></details>
       <p class="note">Conditional scenarios from the initial forecast. Existing cultivation costs are sunk for this decision. Crop-state scenarios receive equal weight. Sample noise assumes 15 percentage points of plant variation plus 3 points of measurement uncertainty. Prices, crop weight, and space value are entered assumptions. This analysis estimates the value of information within the model.</p>
+    </section>
+    <section id="market" class="panel evidence">
+      <p class="eyebrow">Living potted dwarf tomatoes</p>
+      <h2>Harvest-to-Market Planner</h2>
+      <p class="note">Example inputs. Use your carrier’s road mileage and drive time.</p>
+      <div class="tabs" id="market-presets" aria-label="Illustrative routes">
+        <button type="button" data-route="local" aria-pressed="true">Local</button>
+        <button type="button" data-route="regional" aria-pressed="false">Regional</button>
+        <button type="button" data-route="long" aria-pressed="false">Long distance</button>
+      </div>
+      <form id="market-form"></form>
+      <h3 id="market-order"></h3>
+      <p id="market-result" aria-live="polite"></p>
+      <div id="market-timeline" class="market-cards"></div>
+      <div id="market-kpis" class="market-cards"></div>
+      <div id="market-bars"></div>
+      <p id="market-comparison"></p>
+      <div class="market-chart-panel">
+        <label>Chart metric <select id="market-metric"><option value="profit">Net contribution (€)</option><option value="red">Arrival ripeness (%)</option><option value="freight">Freight (€)</option></select></label>
+        <canvas id="market-chart" role="img" aria-label="Selected metric by harvest day. Exact values are in the next table." style="width:100%;height:220px"></canvas>
+      </div>
+      <details><summary>Shipment costs, scenarios and daily figures</summary>
+        <p class="note" id="market-costs"></p>
+        <div class="table-scroll"><table id="market-scenarios"></table></div>
+        <div class="table-scroll channel-history"><table id="market-days"></table></div>
+        <p class="note">All three modeled arrivals must meet the delivery window. The expected case must pass the order’s quality and rejection limits. Scenario weights are assumptions. Times use a shared planning clock.</p>
+      </details>
+      <p class="note">Shipment quality and earnings are simulated. The trial measured greenhouse conditions and crop ripeness.</p>
     </section>
 <section id="orders" class="panel evidence">
 <p class="eyebrow">Six-room order planning</p><h2>Can we deliver the order?</h2>
@@ -134,6 +167,21 @@
       <div class="table-scroll"><table id="metrics"></table></div>
       <details><summary>See the six room-level predictions</summary><div class="table-scroll"><table id="room-results"></table></div></details>
       <p class="note">The mean baseline has the lowest error on this endpoint. The planners also estimate how ripeness changes day by day so growers can compare harvest dates.</p>
+      <p><a href="#model-comparison">Compare the experimental forecasts</a></p>
+    </section>
+    <section id="model-comparison" class="panel evidence" aria-labelledby="comparison-title">
+      <p class="eyebrow">Experimental forecasts</p><h2 id="comparison-title">Model comparison</h2>
+      <p>November 5 forecasts, scored at recorded harvest across six held-out rooms. Select a greenhouse at the top of the page to compare its 21-day outlook.</p>
+      <div class="table-scroll"><table id="ml-metrics"></table></div>
+      <div class="section-heading"><div><h3 id="ml-room-title"></h3><label>Experimental model <select id="ml-model"></select></label></div><p id="ml-legend"></p></div>
+      <canvas id="ml-chart" role="img" aria-labelledby="ml-room-title ml-legend" style="width:100%;height:260px"></canvas>
+      <p id="ml-actual"></p>
+      <div class="table-scroll"><table id="ml-decisions"></table></div>
+      <details><summary>Daily values, room errors, and feature gain</summary>
+        <p id="ml-gain"></p><div class="table-scroll"><table id="ml-errors"></table></div>
+        <div class="table-scroll channel-history"><table id="ml-days"></table></div>
+      </details>
+      <p class="note">Shading varies training-room composition and future warmth. It has no calibrated probability coverage. Alternate dates and profits are simulated. Experimental forecasts use the no-sample setup. The main planner continues to support crop sampling with the existing logistic model.</p>
     </section>
     <section id="methods" class="panel evidence" aria-labelledby="methods-title">
       <div class="section-heading"><div><p class="eyebrow">Model and assumptions</p><h2 id="methods-title">How the recommendation works</h2></div></div>
