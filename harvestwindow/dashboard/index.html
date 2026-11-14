@@ -19,15 +19,16 @@
   <script defer src="ml-comparison.js"></script>
   <script defer src="market.js"></script>
   <script defer src="market-ui.js"></script>
+  <script defer src="workspace.js"></script>
 </head>
 <body>
   <header class="masthead">
     <a class="brand" href="#planner"><span class="brand-mark" aria-hidden="true">✦</span> HarvestWindow</a>
-    <nav aria-label="Sections"><a href="#planner">Planner</a><a href="#market">Market</a><a href="#orders">Orders</a><a href="#operations">Operations</a><a href="#journal">Tasks</a><a href="#evidence">Backtest</a></nav>
+    <nav aria-label="Grower workspace"><a href="#planner">Harvest</a><a href="#market">Ship</a><a href="#orders">Orders</a><a href="#operations">Crop checks</a><a href="#journal">Tasks</a><a href="#evidence">Forecast results</a></nav>
   </header>
   <main id="planner">
     <div class="intro">
-      <div><p class="eyebrow">Dwarf tomato · Greenhouse harvest planner</p><h1>Is it time to harvest?</h1></div>
+      <div><p class="eyebrow">Potted dwarf tomatoes</p><h1 id="workspace-title">Is it time to harvest?</h1></div>
       <label class="room-control">Greenhouse <select id="room"></select></label>
     </div>
     <div class="workspace">
@@ -84,24 +85,30 @@
     <section id="market" class="panel evidence">
       <p class="eyebrow">Living potted dwarf tomatoes</p>
       <h2>Harvest-to-Market Planner</h2>
-      <p>Compare shipment schedules for the selected greenhouse and its current crop forecast. All shipment inputs start with illustrative assumptions. Enter road distance and travel time separately.</p>
+      <p class="note">Example inputs. Use your carrier’s road mileage and drive time.</p>
       <div class="tabs" id="market-presets" aria-label="Illustrative routes">
-        <button type="button" data-route="local">Local · 30 km</button>
-        <button type="button" data-route="regional">Regional · 400 km</button>
-        <button type="button" data-route="long">Long · 1,000 km</button>
+        <button type="button" data-route="local" aria-pressed="true">Local</button>
+        <button type="button" data-route="regional" aria-pressed="false">Regional</button>
+        <button type="button" data-route="long" aria-pressed="false">Long distance</button>
       </div>
       <form id="market-form"></form>
       <h3 id="market-order"></h3>
       <p id="market-result" aria-live="polite"></p>
+      <div id="market-timeline" class="market-cards"></div>
+      <div id="market-kpis" class="market-cards"></div>
+      <div id="market-bars"></div>
       <p id="market-comparison"></p>
-      <p class="note" id="market-costs"></p>
-      <div class="table-scroll"><table id="market-scenarios"></table></div>
-      <details><summary>Compare harvest dates and shipment economics</summary>
+      <div class="market-chart-panel">
         <label>Chart metric <select id="market-metric"><option value="profit">Net contribution (€)</option><option value="red">Arrival ripeness (%)</option><option value="freight">Freight (€)</option></select></label>
         <canvas id="market-chart" role="img" aria-label="Selected metric by harvest day. Exact values are in the next table." style="width:100%;height:220px"></canvas>
+      </div>
+      <details><summary>Shipment costs, scenarios and daily figures</summary>
+        <p class="note" id="market-costs"></p>
+        <div class="table-scroll"><table id="market-scenarios"></table></div>
         <div class="table-scroll channel-history"><table id="market-days"></table></div>
+        <p class="note">All three modeled arrivals must meet the delivery window. The expected case must pass the order’s quality and rejection limits. Scenario weights are assumptions. Times use a shared planning clock.</p>
       </details>
-      <p class="note">Arrival condition uses a provisional live-plant simulator. The trial contains no measured shipment outcomes. Scenario weights are illustrative. All three arrivals must meet the delivery window. The expected scenario must pass quality, display life, and rejection limits. The timestamps use a shared planning clock.</p>
+      <p class="note">Shipment quality and earnings are simulated. The trial measured greenhouse conditions and crop ripeness.</p>
     </section>
 <section id="orders" class="panel evidence">
 <p class="eyebrow">Six-room order planning</p><h2>Can we deliver the order?</h2>

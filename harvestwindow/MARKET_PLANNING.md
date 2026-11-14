@@ -2,6 +2,8 @@
 
 Open `dashboard/index.html#market` in Chrome or Edge. Choose a greenhouse at the top of the page, then select a route preset and edit the order, window, and assumptions. A crop sample or camera fallback in the original planner automatically updates the shipment calculation. The Local, Regional, and Long buttons replace only route fields. Expand the date comparison to inspect exact values and chart contribution, arrival color, or freight. The app uses the existing logistic replay and works from local files.
 
+The Ship screen displays road distance in miles and freight rate in euros per mile. The simulator and saved reference routes use kilometers internally, with conversion at the dashboard boundary. The main navigation groups Harvest, Ship, Orders, Crop checks, Tasks and Forecast results into separate views.
+
 ## Product and evidence
 
 The Track 1 Challenge 2 brief identifies the Wageningen dwarf-tomato trial. The study's harvest decision removes marketable whole pots with fruit attached, and the existing planner grades pots using a red-fruit share proxy and minimum red weight. Those are the units in this module. Detached tomatoes require their own postharvest model. The calculator explicitly rejects a detached-fruit product input. [Trial and harvest scoring](https://pmc.ncbi.nlm.nih.gov/articles/PMC12299141/) · [Detached tomato handling reference](https://postharvest.ucdavis.edu/ar/produce-facts-sheets/tomato)

@@ -2,20 +2,27 @@
 (() => {
   const api = window.harvestMarket;
   const form = document.getElementById("market-form");
+  const KM_PER_MILE = 1.609344;
+  const toForm = (key, value) => ({
+    distance: () => (value / KM_PER_MILE).toFixed(2),
+    perKm: () => (value * KM_PER_MILE).toFixed(6)
+  })[key]?.() ?? value;
   const groups = [
     ["Customer and order", { order: "Order identifier", origin: "Origin", destination: "Destination",
       earliest: "Earliest arrival", deadline: "Delivery deadline", quantity: "Order size (pots)",
+      distance: "Road distance (miles)", drive: "Driving (hours)", price: "Selling price (€/accepted pot)" }],
+    ["Customer quality requirements", {
       minRed: "Minimum red fruit by weight (%)", minQuality: "Minimum plant condition score (0–100)",
       minLife: "Minimum remaining display life (days)", maxReject: "Maximum rejected pots (%)" }],
-    ["Transport and handling", { vehicle: "Vehicle description", distance: "Road distance (km)",
-      drive: "Driving (hours)", loading: "Loading (hours)", unloading: "Unloading (hours)",
+    ["Transport and handling", { vehicle: "Vehicle description",
+      loading: "Loading (hours)", unloading: "Unloading (hours)",
       delay: "Adverse delay (hours)", hold: "Maximum preloading hold (hours)",
       capacity: "Vehicle capacity (pots)", sharedPots: "Other orders on truck (pots)",
       temp: "Transport temperature (°C)", excursion: "Adverse temperature change (°C)",
       watered: "Watered and protected while holding", damage: "Base handling damage (%)" }],
     ["Price, costs, and simulator assumptions", {
-      area: "Allocated greenhouse area (m²)", price: "Selling price (€/accepted pot)",
-      fixed: "Fixed freight (€ / truck)", perKm: "Mileage (€/km)", cooling: "Temperature control (€/hour)",
+      area: "Allocated greenhouse area (m²)",
+      fixed: "Fixed freight (€/truck)", perKm: "Mileage rate (€/mile)", cooling: "Temperature control (€/hour)",
       packing: "Harvest and packaging (€/pot)", rejectCost: "Disposal (€/rejected pot)",
       penalty: "Failed delivery penalty (€)", space: "Space opportunity cost (€/m²/day)",
       redRate: "Color development rate (% of unripe fraction/day)", baseLife: "Base display life (days)"
@@ -36,7 +43,8 @@
       const bounds = api.limits[key];
       if (bounds) {
         input.type = "number";
-        [input.min, input.max] = bounds;
+        input.max = toForm(key, bounds[1]);
+        input.min = toForm(key, bounds[0]);
         input.step = ["quantity", "capacity", "sharedPots"].includes(key) ? "1" : "any";
       } else if (key === "earliest" || key === "deadline") input.type = "date";
       else if (key === "watered") input.type = "checkbox";
@@ -51,7 +59,8 @@
 
   const euros = n => "€" + n.toFixed(2);
   const percent1 = n => n.toFixed(1) + "%";
-  const time = n => new Date(n).toISOString().slice(0,16).replace("T"," ");
+  const time = n => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "short",
+    day: "numeric", hour: "numeric", minute: "2-digit" }).format(n);
   const count = n => Math.round(n).toLocaleString();
   function showTable(id, columns, rows) {
     document.getElementById(id).replaceChildren();
@@ -59,6 +68,34 @@
   }
 
   let currentDays = [];
+  function cards(id, entries) {
+    const container = document.getElementById(id);
+    container.replaceChildren(...entries.map(([label, value]) => {
+      const card = document.createElement("div");
+      const title = document.createElement("span");
+      const amount = document.createElement("strong");
+      title.textContent = label;
+      amount.textContent = value;
+      card.append(title, amount);
+      return card;
+    }));
+  }
+  function bars(entries) {
+    const container = document.getElementById("market-bars");
+    container.replaceChildren(...entries.map(([label, value, display]) => {
+      const row = document.createElement("div");
+      const title = document.createElement("span");
+      const meter = document.createElement("meter");
+      const amount = document.createElement("strong");
+      title.textContent = label;
+      meter.max = 100;
+      meter.value = value;
+      meter.setAttribute("aria-label", label);
+      amount.textContent = display;
+      row.append(title, meter, amount);
+      return row;
+    }));
+  }
   function draw() {
     const canvas = document.getElementById("market-chart");
     const {clientWidth: width, clientHeight: height} = canvas;
@@ -72,7 +109,11 @@
     const points = currentDays.map((row, index) => ({
       index, value: metric === "red" ? row.expected?.red : row[metric], feasible: row.feasible
     })).filter(p => Number.isFinite(p.value));
-    if (!points.length) return;
+    if (!points.length) {
+      ctx.fillStyle = "#52645a";
+      ctx.fillText("No schedules to chart in this delivery window.", 12, 26);
+      return;
+    }
     const lo = Math.min(...points.map(p => p.value));
     const hi = Math.max(...points.map(p => p.value));
     const x = index => 58 + index * (width - 80) / 20;
@@ -88,7 +129,7 @@
       ctx.arc(x(p.index), y(p.value), 4, 0, 2 * Math.PI); ctx.fill();
     }
     ctx.fillStyle = "#52645a";
-    ctx.fillText("Green: feasible  ·  Red: fails expected quality or rejection", 58, 13);
+    ctx.fillText("Green: meets order  ·  Red: falls short", 58, 13);
   }
 
   function renderMarket() {
@@ -100,12 +141,14 @@
     const costs = document.getElementById("market-costs");
     costs.textContent = "";
     const existing = plan.selected === null ? "beyond outlook" : plan.points[plan.selected].date;
-    compare.textContent = "Original HarvestWindow recommendation: " + existing + " (" + plan.action + ").";
+    compare.textContent = "Harvest without shipping: " + existing + " (" + plan.action + ").";
     document.getElementById("market-order").textContent = [raw.order, raw.destination].filter(Boolean).join(" · ");
     let result;
     try {
       if (!form.checkValidity()) throw new Error("Complete the highlighted shipment fields to calculate a schedule.");
       for (const key of Object.keys(api.limits)) raw[key] = Number(raw[key]);
+      raw.distance = Math.min(api.limits.distance[1], raw.distance * KM_PER_MILE);
+      raw.perKm = Math.min(api.limits.perKm[1], raw.perKm / KM_PER_MILE);
       raw.watered = form.elements.watered.checked;
       result = api.optimize(plan, source.forecastInputs, raw);
       output.textContent = result.reason;
@@ -113,14 +156,21 @@
       output.textContent = error.message;
     }
     const best = result?.best;
+    cards("market-timeline", []);
+    cards("market-kpis", []);
+    bars([]);
     if (best) {
       const row = best.expected;
-      output.textContent = "Harvest " + time(best.harvest) + " · dispatch " + time(best.dispatch) +
-        " · expected arrival " + time(row.arrival) + ". Ripeness " + percent1(row.harvestRed) +
-        " at harvest and " + percent1(row.red) + " at arrival. Expected saleable " + count(best.saleable) +
-        " of " + count(raw.quantity) + " pots. Freight " + euros(best.freight) +
-        " · net contribution " + euros(best.profit) + " · worst scenario " + euros(best.worstProfit) +
-        " · failing scenario weight " + percent1(100 * best.risk) + ".";
+      output.textContent = best.profit < 0 ? "All feasible plans lose money under these assumptions." : "Recommended schedule";
+      cards("market-timeline", [["Harvest", time(best.harvest)], ["Dispatch", time(best.dispatch)],
+        ["Expected arrival", time(row.arrival)]]);
+      cards("market-kpis", [["Estimated earnings after costs", euros(best.profit)],
+        ["Freight", euros(best.freight)], ["Display life on arrival", row.life.toFixed(1) + " days"],
+        ["Worst scenario", euros(best.worstProfit)]]);
+      bars([["Red fruit at harvest", row.harvestRed, percent1(row.harvestRed)],
+        ["Red fruit on arrival", row.red, percent1(row.red)],
+        ["Expected saleable pots", 100 * best.saleable / raw.quantity, count(best.saleable) + " / " + count(raw.quantity)],
+        ["Failing scenario weight", 100 * best.risk, percent1(100 * best.risk)]]);
       const originalDay = result.days.find(day => day.date === existing);
       compare.textContent += " Transportation-aware harvest: " + best.date + ". " +
         (best.date === existing ? "Both objectives selected this harvest date."
@@ -128,7 +178,6 @@
           : !originalDay.feasible ? "The original day misses expected quality, display life or rejection limits."
           : "The selected date earns " + euros(best.profit - originalDay.profit) +
             " more in modelled delivery contribution than the original day.");
-      if (best.profit < 0) output.textContent += " Every feasible plan has negative expected contribution.";
       const weighted = key => euros(best.scenarios.reduce((sum, scenario) =>
         sum + scenario.weight * scenario[key], 0));
       costs.textContent = "Expected revenue " + weighted("revenue") + " less freight " + weighted("freight") +
@@ -151,20 +200,22 @@
     draw();
   }
 
-  function setPreset(name) {
-    const values = { ...api.defaults, ...api.presets[name] };
+  function setPreset(button) {
+    const values = { ...api.defaults, ...api.presets[button.dataset.route] };
     // Change the route without discarding customer thresholds or commercial inputs.
     for (const key of ["destination", "distance", "drive", "delay", "fixed"]) {
-      form.elements[key].value = values[key];
+      form.elements[key].value = toForm(key, values[key]);
     }
+    document.querySelectorAll("#market-presets button").forEach(preset =>
+      preset.setAttribute("aria-pressed", String(preset === button)));
     renderMarket();
   }
   for (const input of form.elements) {
     if (input.type === "checkbox") input.checked = api.defaults[input.name];
-    else input.value = api.defaults[input.name];
+    else input.value = toForm(input.name, api.defaults[input.name]);
   }
   document.querySelectorAll("#market-presets button").forEach(button =>
-    button.addEventListener("click", () => setPreset(button.dataset.route)));
+    button.addEventListener("click", () => setPreset(button)));
   form.addEventListener("submit", event => event.preventDefault());
   form.addEventListener("input", renderMarket);
   document.addEventListener("harvestwindow:forecast", renderMarket);
