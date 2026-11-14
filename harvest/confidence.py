@@ -128,4 +128,5 @@ def confidence(inputs: Inputs, room: str, today: date, settings: dict | None = N
     graded = sorted([(lvl_range, why_range), (lvl_agree, why_agree), (lvl_fresh, why_fresh)],
                     key=lambda x: -RANK[x[0]])
     return dict(level=graded[0][0], day_range_days=width, agreement=agree, freshness_days=int(fresh),
-                reasons=[why for _, why in graded])
+                reasons=[why for _, why in graded],
+                part_levels=dict(day_range=lvl_range, agreement=lvl_agree, freshness=lvl_fresh))  # D12: per-part levels for the app

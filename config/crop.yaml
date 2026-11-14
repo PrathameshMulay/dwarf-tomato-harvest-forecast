@@ -19,6 +19,10 @@ ripeness:
   rate_days: 7               # Team choice (SPEC §4): future warmth per day = mean of the last N days
   plant_spread_sd: 12.5      # Data: pooled sd of % red across plants in the 5 Nov hand weighings (main, README)
   horizon_days: 21           # Team choice (SPEC §5): days ahead the harvest window looks
+  # D12: starting guess used only before any room has a ripe crop sample (strict "known by today").
+  prior_k: 0.03              # main's forecast.py starting value for the curve slope
+  prior_g50: 750.0           # main's starting value: degree-days at 50% red
+  prior_g50_sd: 60.0         # wide spread so confidence reads low while only the guess is available
 
 economics:
   sellable_red_share: 0.3333 # Paper §2.5 and §3.1: unsellable if under one third of fruit (by weight) is red. VERIFIED
@@ -44,18 +48,23 @@ economics:
   harvest_now_share: 0.90         # PROPOSED: status harvest_now needs at least this share sellable today
   area_m2: 96.0                   # Paper §2.2: six equal compartments of 96 m2. VERIFIED
 
-confidence:                  # PROPOSED thresholds (team choice, G1); level = worst of the three parts
-  day_range_high_max: 4      # best-day range (days) at most this -> high
-  day_range_medium_max: 8    # at most this -> medium, else low
+confidence:                  # Team choice, approved by the user (D11); level = worst of the three parts
+  day_range_high_max: 7      # best-day range (days) at most this -> high (D11: real ranges are 6-12 days)
+  day_range_medium_max: 12   # at most this -> medium, else low
   agree_points: 10           # camera / sample within this many points of the forecast -> agree
   conflict_points: 20        # more than this apart -> conflict, between -> mixed
-  fresh_high_max: 3          # days since newest sample or usable photo at most this -> high
-  fresh_medium_max: 7
+  fresh_high_max: 7          # days since newest sample or usable photo at most this -> high (D11)
+  fresh_medium_max: 14       # (D11)
 
 alerts:                      # PROPOSED thresholds (team choice)
   schedule_points: 15        # sample or camera outside the band by more than this -> behind/ahead
   flatline_days: 3           # same reading this many days running -> sensor check
   drift_share: 0.15          # 7-day warmth rate this far below the other rooms' median -> drift
+  ranges:                    # Plausible daily means for the sensor check (L03 defaults; screening bounds, not crop targets)
+    T_mean: {min: 5, max: 40}
+    RH_mean: {min: 20, max: 100}
+    CO2_mean: {min: 200, max: 2000}
+    DLI: {min: 0, max: 40}
 
 # Machine-readable assumption list for app/data/assumptions.json (contract: name, value, unit, source, if_wrong).
 # `key` points at the setting above so the value is never typed twice.

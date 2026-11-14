@@ -31,7 +31,7 @@ ENUMS = {
     ('days', 'status'): {'harvest_now', 'plan_harvest', 'keep_growing', 'check_crop'},
     ('days', 'confidence'): {'high', 'medium', 'low'},
     ('days', 'conf_agreement'): {'agree', 'mixed', 'conflict'},
-    ('days', 'model'): {'warmth', 'warmth+camera', 'warmth+camera+sample'},
+    ('days', 'model'): {'warmth', 'warmth+sample', 'warmth+camera', 'warmth+camera+sample'},
     ('alerts', 'kind'): {'behind_schedule', 'ahead_of_schedule', 'sensor_check', 'room_drift'},
     ('alerts', 'severity'): {'info', 'warning'},
 }

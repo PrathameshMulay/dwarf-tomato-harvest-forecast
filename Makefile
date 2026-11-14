@@ -9,11 +9,15 @@ setup:
 	.venv/bin/pip install -q -r requirements-poc.txt
 
 test:
-	$(PY) -m pytest -q
-	$(PY) contracts/check.py
+	"$(PY)" -m pytest -q
+	"$(PY)" contracts/check.py
+	"$(PY)" app/check_app.py
 
 build:
-	$(PY) -m harvest.publish
+	"$(PY)" scripts/select_photos.py
+	"$(PY)" -m harvest.publish
+	"$(PY)" contracts/check.py app/data
+	"$(PY)" app/check_app.py app/data
 
 app:
-	$(PY) -m http.server 8766 --directory app
+	"$(PY)" -m http.server 8766 --directory app

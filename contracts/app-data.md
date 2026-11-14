@@ -35,7 +35,7 @@ Dates are `"YYYY-MM-DD"` strings. Numbers are plain JSON numbers (no NaN; use `n
 | status | str | `harvest_now` · `plan_harvest` · `keep_growing` · `check_crop` |
 | pct_red_now, pct_red_low, pct_red_high | number | estimated % red by weight today and its band |
 | sellable_share_now | number | 0–1 share of pots that would sell today |
-| model | str | `warmth` · `warmth+camera` · `warmth+camera+sample` |
+| model | str | `warmth` · `warmth+sample` · `warmth+camera` · `warmth+camera+sample` |
 | earliest_sellable_day, best_day, losses_start_day | date\|null | the harvest window (SPEC §5) |
 | best_day_low, best_day_high | date | likely range of the best day |
 | profit_best_m2_day, profit_today_m2_day | number | € per m² per day |
@@ -44,6 +44,7 @@ Dates are `"YYYY-MM-DD"` strings. Numbers are plain JSON numbers (no NaN; use `n
 | conf_agreement | str | `agree` · `mixed` · `conflict` |
 | conf_freshness_days | int | days since newest crop sample or usable photo (larger of the two) |
 | conf_reasons | list[str] | plain-English reasons, 1–3 |
+| conf_day_range_level, conf_agreement_level, conf_freshness_level | str | `high` · `medium` · `low` for each part (added at G2) |
 
 ### `forecast.json` — one row per room × today × day ahead (0–21)
 `room, today, date, pct_red, pct_red_low, pct_red_high, sellable_share, profit_m2_day, profit_low, profit_high, cost_to_date_m2`
@@ -53,7 +54,9 @@ Dates are `"YYYY-MM-DD"` strings. Numbers are plain JSON numbers (no NaN; use `n
 `room, today, delta_c, best_day, days_change, profit_best_m2_day, profit_change_m2_day, extra_energy_cost_m2_day, note`
 
 ### `evidence.json` — one row per room × date (from planting to day before harvest)
-`room, date, photo (relative path or null), photo_usable (bool), lamps_on (bool|null), red_index, green_pct, canopy_distance_mm, gdd_cum, last_sample_date, last_sample_pct_red, last_sample_fw_g`
+`room, date, photo (path relative to `app/index.html`, e.g. `data/photos/x.jpg`, or null), photo_usable (bool), lamps_on (bool|null), red_index, green_pct, canopy_distance_mm, gdd_cum, last_sample_date, last_sample_pct_red, last_sample_fw_g`
+
+`meta.heating_fit` = `{eur_m2_day_per_c, r2, n, note}` from `heating_cost_per_degree` (added at G2).
 
 ### `alerts.json`
 `room, date, kind (behind_schedule|ahead_of_schedule|sensor_check|room_drift), severity (info|warning), title, message, numbers (object of the values behind it)`
