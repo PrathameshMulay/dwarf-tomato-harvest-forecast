@@ -56,7 +56,7 @@ def gains(red_g: np.ndarray, curve: list) -> np.ndarray:
     """Euros per pot for its red fruit grams: linear between the gains-curve points [red_g, eur].
 
     Flat beyond the last point, so the 150 g cap is in the curve itself. Example with
-    [[0,0],[49.99,0],[80,1.60],[150,1.80]]: 115 g -> 1.60 + (115-80)/(150-80) * 0.20 = 1.70.
+    [[0,0],[50,0],[80,1.60],[150,1.80]]: 115 g -> 1.60 + (115-80)/(150-80) * 0.20 = 1.70.
     """
     pts = np.asarray(curve, dtype=float)
     return np.interp(np.asarray(red_g, dtype=float), pts[:, 0], pts[:, 1])

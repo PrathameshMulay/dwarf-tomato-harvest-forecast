@@ -23,11 +23,11 @@ def test_plant_pct_spread_on_log_odds_scale():
 
 
 def test_gains_curve_interpolation(settings):
-    curve = settings['economics']['gains_curve_low']   # fixture: [[0,0],[49.99,0],[80,1.60],[150,1.80]]
-    # 45 g -> 0 (under 50 g); 65 g -> (65-49.99)/(80-49.99) * 1.60 = 0.800267; 80 g -> 1.60;
+    curve = settings['economics']['gains_curve_low']   # fixture: [[0,0],[50,0],[80,1.60],[150,1.80]]
+    # 45 g -> 0 (under 50 g); 65 g -> (65-50)/(80-50) * 1.60 = 0.80; 80 g -> 1.60;
     # 115 g -> 1.60 + 35/70 * 0.20 = 1.70; 150 g -> 1.80; 200 g -> 1.80 (flat past the last point)
     got = gains(np.array([45.0, 65.0, 80.0, 115.0, 150.0, 200.0]), curve)
-    assert got == pytest.approx([0.0, 0.800267, 1.60, 1.70, 1.80, 1.80], abs=1e-6)
+    assert got == pytest.approx([0.0, 0.80, 1.60, 1.70, 1.80, 1.80], abs=1e-6)
 
 
 def test_tiny_hand_worked_profit_day(settings):
