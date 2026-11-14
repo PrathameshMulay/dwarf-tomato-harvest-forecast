@@ -1,0 +1,35 @@
+# Fixture copy of the crop settings. L05 owns config/crop.yaml and keeps these keys.
+# Values marked PROPOSED are G1 decisions.
+crop: dwarf tomato (potted, sold as whole pots)
+planted: 2024-09-03
+base_temp_c: 10.0            # degree-day base temperature
+ripeness:
+  sample_weight: 0.7         # how far a crop sample pulls the curve (0 = ignore, 1 = pass through it)
+  onset_red_index: 0.1       # % of photo that is red fruit, 3 days running, to call ripening started
+  onset_days: 3
+  rate_days: 7               # future warmth per day = mean of the last N days
+  plant_spread_sd: 12.5      # plant-to-plant spread in % red mid-ripening (5 Nov weighings)
+  horizon_days: 21
+economics:
+  sellable_red_share: 0.3333 # a pot sells only if at least this share of fruit weight is red
+  red_cap_g: 150.0           # red fruit above this per pot adds no revenue
+  price_eur_per_pot: 2.15
+  price_low: 1.75
+  price_high: 2.50
+  plant_cost_eur: 0.75
+  respacing_cost_eur_m2: 1.50
+  cost_rate_days: 7
+  earliest_sellable_share: 0.95   # PROPOSED: "earliest sellable day" = this share of pots sellable
+  harvest_now_share: 0.90         # PROPOSED: status harvest_now needs at least this share sellable today
+  area_m2: 96.0                   # PROPOSED: room area for euro totals (compartment size to be confirmed)
+confidence:                  # PROPOSED thresholds; level = worst of the three parts
+  day_range_high_max: 4      # best-day range (days) at most this -> high
+  day_range_medium_max: 8    # at most this -> medium, else low
+  agree_points: 10           # camera / sample within this many points of the forecast -> agree
+  conflict_points: 20        # more than this apart -> conflict, between -> mixed
+  fresh_high_max: 3          # days since newest sample or usable photo at most this -> high
+  fresh_medium_max: 7
+alerts:
+  schedule_points: 15        # sample or camera outside the band by more than this -> behind/ahead
+  flatline_days: 3
+  drift_share: 0.15          # 7-day warmth rate this far below the other rooms' median -> drift
