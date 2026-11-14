@@ -1,0 +1,180 @@
+"""Profit by harvest day and the harvest window (SPEC §5). Lane L02.
+
+Ported from `main`'s `forecast.py::profit_tables`, with every number taken from `config/crop.yaml`.
+
+The rules (challenge scoring, Maree et al. 2025, still "assumed" until L05 verifies them):
+- a pot sells only if at least a third of its fruit weight is red;
+- revenue per pot rises with red fruit weight up to 150 g, then stops rising;
+- costs are plants (per pot), re-spacings (per m²) and the room's own daily energy + fixed costs;
+- rooms are ranked on net profit per m² per day grown.
+
+Pots in a room ripen at different times, so on any day some pots are sellable and some are not. We
+spread each pot's ripeness around the room's forecast % red (see `plant_pct`).
+"""
+from __future__ import annotations
+
+from datetime import date
+
+import numpy as np
+import pandas as pd
+from scipy.stats import norm
+
+from harvest.common import PLANTED, Inputs, known_by, load_settings
+
+# 40 pots placed at evenly spaced normal quantiles: a smooth, repeatable stand-in for "a room of pots".
+# This is a numerical grid, not a crop setting, so it stays in code.
+Z = norm.ppf(np.linspace(0.0125, 0.9875, 40))
+
+# Scenario columns of the forecast: ripening early = high % red band, late = low band.
+SCENARIOS = {'mid': 'pct_red', 'early': 'pct_red_high', 'late': 'pct_red_low'}
+
+
+# ---------------------------------------------------------------- small pure pieces (unit-tested)
+
+def plant_pct(pct_red: float, spread_sd: float, z: np.ndarray = Z) -> np.ndarray:
+    """% red of each pot when the room as a whole is `pct_red` % red.
+
+    `main` gives every pot its own ripening midpoint, spread so pots differ by `spread_sd` points
+    mid-ripening; the S-curve squeezes that spread near 0 % and 100 %. On the log-odds scale that is a
+    fixed shift of 4 * spread_sd / 100 per standard deviation, whatever the curve's steepness, so we
+    can do it from % red alone. Example: room 50 % red, spread 12.5 → log-odds sd 0.5 → a pot one sd
+    ahead is 100 / (1 + e^-0.5) = 62.2 % red.
+    """
+    p = np.clip(float(pct_red), 1e-9, 100 - 1e-9) / 100
+    x = np.log(p / (1 - p)) + (4 * spread_sd / 100) * np.asarray(z)
+    return 100 / (1 + np.exp(-x))
+
+
+def pot_revenue(pct_pots: np.ndarray, fw_g: float, price: float, econ: dict) -> np.ndarray:
+    """Euros per pot: price × (red grams, capped) / cap, and nothing for pots under the sellable share."""
+    pct_pots = np.asarray(pct_pots, dtype=float)
+    sold = pct_pots >= 100 * econ['sellable_red_share']
+    red_g = np.minimum(pct_pots / 100 * fw_g, econ['red_cap_g'])
+    return price * red_g / econ['red_cap_g'] * sold
+
+
+def profit_m2_day(revenue_per_pot: float, density: float, running_cost_m2: float, days_grown: int,
+                  plant_cost: float) -> float:
+    """Net profit per m² per day grown = (pots/m² × (revenue per pot − plant cost) − other costs/m²) / days."""
+    return (density * (revenue_per_pot - plant_cost) - running_cost_m2) / days_grown
+
+
+# ---------------------------------------------------------------- inputs a room's curve needs
+
+def fruit_weight(inputs: Inputs, room: str, today: date) -> float:
+    """Fruit weight per pot (g): the room's latest crop sample dated on or before today.
+
+    If the room has none yet, the other rooms' mean on their latest sample day on or before today
+    (all rooms were sampled on the same days, so that is the same crop age).
+    """
+    r = known_by(inputs.ripeness[inputs.ripeness['sample'] != 'final'], today)
+    own = r[r.room == room].sort_values('date')
+    if len(own):
+        return float(own.fw_total.iloc[-1])
+    other = r[r.room != room]
+    if not len(other):
+        raise ValueError(f'no crop sample on or before {today} for any room')
+    return float(other[other.date == other.date.max()].fw_total.mean())
+
+
+def costs_so_far(inputs: Inputs, room: str, today: date, econ: dict) -> dict:
+    """What the room has cost per m² up to today, its pots per m², and its recent daily cost rate.
+
+    running_m2 = energy + fixed costs from the log + €1.50 per re-spacing (a change in density).
+    rate_m2_day = mean daily log cost over the last `cost_rate_days` days (used for future days).
+    """
+    d = known_by(inputs.daily[inputs.daily.room == room], today).sort_values('date')
+    if not len(d):
+        raise ValueError(f'no daily log for room {room!r} on or before {today}')
+    spacings = int((d.density.diff().fillna(0) != 0).sum())
+    return dict(running_m2=float(d.cost_eur_m2.sum() + econ['respacing_cost_eur_m2'] * spacings),
+                rate_m2_day=float(d.cost_eur_m2.tail(int(econ['cost_rate_days'])).mean()),
+                density=float(d.density.iloc[-1]), spacings=spacings)
+
+
+# ---------------------------------------------------------------- contract functions
+
+def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, params: dict, *,
+                  settings: dict | None = None, extra_cost_m2_day: float = 0.0) -> pd.DataFrame:
+    """Expected profit per m² per day if the room were harvested on each forecast date.
+
+    `fc` is L01's forecast (date, pct_red, pct_red_low, pct_red_high). `params` is accepted for the
+    contract but not needed: the pot spread works from % red alone (see `plant_pct`).
+    `extra_cost_m2_day` is added to the cost rate for future days (the temperature what-if).
+
+    Adds: sellable_share, profit_m2_day, profit_low, profit_high, cost_to_date_m2 (contract), plus
+    revenue_m2 and the early/late scenario columns that `harvest_window` needs.
+    The band is the min/max over ripening {early, expected, late} × price {low, expected, high}.
+    """
+    s = settings or load_settings()
+    econ, spread = s['economics'], s['ripeness']['plant_spread_sd']
+    planted = s.get('planted', PLANTED)
+    fw = fruit_weight(inputs, room, today)
+    c = costs_so_far(inputs, room, today, econ)
+    plants_m2 = c['density'] * econ['plant_cost_eur']
+    prices = {'low': econ['price_low'], 'mid': econ['price_eur_per_pot'], 'high': econ['price_high']}
+
+    out = fc.copy().reset_index(drop=True)
+    rows = []
+    for x in out.itertuples(index=False):
+        ahead = (x.date - today).days
+        days = (x.date - planted).days + 1
+        cost = c['running_m2'] + (c['rate_m2_day'] + extra_cost_m2_day) * ahead + plants_m2
+        row = dict(cost_to_date_m2=cost)
+        profits = []
+        for scen, col in SCENARIOS.items():
+            pots = plant_pct(getattr(x, col), spread)
+            sfx = '' if scen == 'mid' else f'_{scen}'
+            row['sellable_share' + sfx] = float((pots >= 100 * econ['sellable_red_share']).mean())
+            for tag, price in prices.items():
+                rev = float(pot_revenue(pots, fw, price, econ).mean())
+                p = profit_m2_day(rev, c['density'], cost - plants_m2, days, econ['plant_cost_eur'])
+                profits.append(p)
+                if tag == 'mid':
+                    row['profit_m2_day' + sfx] = p
+                    if scen == 'mid':
+                        row['revenue_m2'] = c['density'] * rev
+        row['profit_low'], row['profit_high'] = min(profits), max(profits)
+        rows.append(row)
+    out = pd.concat([out, pd.DataFrame(rows)], axis=1)
+    out['days_grown'] = [(d - planted).days + 1 for d in out.date]
+    out['fruit_weight_g'], out['density'] = fw, c['density']
+    return out
+
+
+def _best(curve: pd.DataFrame, profit_col: str, share_col: str, min_share: float) -> int:
+    """Row index of the highest profit among days with enough sellable pots (any day if none has)."""
+    ok = curve[curve[share_col] >= min_share]
+    pool = ok if len(ok) else curve
+    return int(pool[profit_col].idxmax())
+
+
+def harvest_window(curve: pd.DataFrame, settings: dict) -> dict:
+    """The three dates a grower acts on, from a `profit_by_day` curve (SPEC §5).
+
+    - earliest_sellable_day: first day with at least `earliest_sellable_share` of pots sellable.
+    - best_day: highest profit per m² per day, among days that meet that share (if none does, the
+      best day overall and earliest_sellable_day is null). So the best day is never one where a
+      grower would be throwing away unsellable pots beyond the setting.
+    - losses_start_day: first day after the best day when one more day's cost is larger than the
+      extra revenue it brings (total profit starts to fall). Null if that is beyond the horizon.
+    - best_day_low/high: best days under the early and late ripening scenarios, widened to include
+      best_day.
+    """
+    econ = settings['economics']
+    need = econ['earliest_sellable_share']
+    c = curve.reset_index(drop=True)
+    ok = c.index[c.sellable_share >= need]
+    earliest = c.date[ok[0]] if len(ok) else None
+    i = _best(c, 'profit_m2_day', 'sellable_share', need)
+    best = c.date[i]
+
+    total = c.revenue_m2 - c.cost_to_date_m2   # net profit per m², not per day
+    gain = total.diff()
+    later = [j for j in range(i + 1, len(c)) if gain[j] < 0]
+    losses = c.date[later[0]] if later else None
+
+    scen = [c.date[_best(c, f'profit_m2_day_{s}', f'sellable_share_{s}', need)] for s in ('early', 'late')]
+    return dict(earliest_sellable_day=earliest, best_day=best, losses_start_day=losses,
+                best_day_low=min(scen + [best]), best_day_high=max(scen + [best]),
+                profit_best_m2_day=float(c.profit_m2_day[i]))
