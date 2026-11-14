@@ -27,9 +27,16 @@ SPEC §5 took the challenge's money rules from comments in `main`'s code. This i
 
 **What we could not confirm.** The price chart (Figure 3) has no table of numbers; values were read off the image and are good to about ±€0.02. They fit Table 1 to the cent, which is strong support. Fruit dry matter sets the price but is not in the dataset, so we use the lower (7%) line; four of six rooms were below 7% (Table 1). Equations (1)–(5) did not render as text in the browser; the formulas above were rebuilt from Table 1, not read from the equations.
 
-**Status.** The model still uses the SPEC values for price and re-spacing until the integrator decides (Blocked item in the L05 status log; decision D9). The paper's values are ready in `crop.yaml` under `scoring_verified:`.
+**Status.** The user approved switching to the paper's rules (decision D10, 14 Nov 2026; resolves D9). `crop.yaml` now uses the gains curve (`gains_curve_low` / `gains_curve_high`), €1.80 per pot at full value (€2.00 high scenario) and `respacing_cost_eur_m2_year`.
 
-## 2. What the corrections would change (expected direction, not yet run)
+**Price curve as data points** (red fruit grams per pot → € per pot before the €0.75 plant cost; straight lines between points, flat after 150 g):
+
+| Red fruit per pot | 0 g | 50 g | 80 g | 150 g and more |
+|---|---|---|---|---|
+| Dry matter 7% or lower (main case) | €0 | €0 | €1.60 | €1.80 |
+| Dry matter 8% or higher (high scenario) | €0 | €0 | €1.80 | €2.00 |
+
+## 2. What the D10 corrections change (expected direction; L02 re-runs the numbers)
 
 - **Lower price (€1.80 vs €2.15):** profit per m² per day falls for every harvest day. The best day hardly moves: `main` showed the best day does not shift between €1.75 and €2.50.
 - **Price curve shape:** the real curve pays most of the price as soon as a pot has 80 g of red fruit and little extra after. Waiting for more red fruit earns less than our straight-line version assumed, so the best day would be estimated the same or a little **earlier**.
@@ -45,10 +52,10 @@ SPEC §5 took the challenge's money rules from comments in `main`'s code. This i
 | Base temperature for warmth (degree-days) | 10 °C | Common convention for tomato; matches our derived tables (day 1: 22.7 °C mean → 12.7 degree-days). We did not read a primary source in the time box (see §4) | Ripening speed per warm day shifts. The temperature what-if is most affected: with a lower base, +1 °C speeds ripening proportionally less. |
 | Share of fruit that must be red to sell | 1/3 by weight | Paper §2.5 (verified) | Earliest sellable day moves, and the best day with it. |
 | Red fruit counted up to | 150 g per pot | Paper §3.1, Fig. 3 (verified) | A higher cap rewards waiting; best day would move later. |
-| Price per pot at full value | €2.15 (SPEC); paper says €1.80–2.00 | SPEC §5 / paper Fig. 3 (under review) | Profit level changes; best day barely moves. |
-| Price stress test | €1.75–2.50 (SPEC); proposed €1.60–2.00 | Team choice; €2.00 is the paper's high-dry-matter price | Only the width of the profit band. |
+| Price per pot by red fruit weight | €0 up to 50 g, €1.60 at 80 g, €1.80 from 150 g | Paper Fig. 3 (verified, D10) | Profit level changes; best day barely moves. |
+| Price scenarios | €1.80 main, €2.00 high (dry matter 8% or more) | Paper Fig. 3 (D10). No lower scenario: €1.80 is already the rules' lowest full-value price | Only the width of the profit band. A real customer's market price could be lower. |
 | Plant cost | €0.75 per pot | Paper §2.5 (verified) | Profit shifts by the same amount per pot; best day unchanged. |
-| Re-spacing cost | €1.50/m² per step (SPEC); paper says per year | SPEC §5 / paper §2.5 (under review) | Profit level only (spacing happens before harvest decisions). |
+| Re-spacing cost | €1.50 per m² per year, per step | Paper §2.5 (verified, D10) | Profit level only (spacing happens before harvest decisions). |
 | Future daily cost | Mean of last 7 days of the room log | Team choice | A cold spell ahead raises heating cost; best day could move a day earlier. |
 | Future warmth per day | Mean of last 7 days | Team choice | Warmer or colder days ahead move ripening by a day or two. |
 | Plant-to-plant spread in ripeness | 12.5 points of % red | Dataset: 5 Nov hand weighings, 6 plants per room, pooled sd | A wider spread delays the day 95% of pots are sellable. |
@@ -67,7 +74,7 @@ Outside data is secondary (SPEC D3) and is **not** a model input.
 
 | Topic | What we did | Result | Role |
 |---|---|---|---|
-| Price per pot | Checked the challenge's own price chart (paper Fig. 3) instead of a market price series | €1.80–2.00 at full value; better than any market proxy because it is the rule the rooms were scored on | Replaces the backed-out €2.15 once the integrator agrees |
+| Price per pot | Checked the challenge's own price chart (paper Fig. 3) instead of a market price series | €1.80–2.00 at full value; better than any market proxy because it is the rule the rooms were scored on | Replaced the backed-out €2.15 (D10) |
 | Market price of potted / vine tomatoes (EU) | Not done in the time box; the paper's chart made it less useful | — | Roadmap: compare with a customer's real sales price |
 | Base temperature 10 °C | Web search, 14 Nov 2026. Two candidate sources found (a review and a 2024 *HortTechnology* study of compact container tomatoes reporting minimum temperatures near 9–11 °C by variety) but neither could be opened (403 / unreadable PDF), so they are **not cited as verified** | 10 °C stays as a convention | Assumption; flagged as unverified |
 

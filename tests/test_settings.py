@@ -50,6 +50,12 @@ def test_values_in_sane_ranges(cfg):
     assert 50 <= e['red_cap_g'] <= 500
     assert 0 < e['price_low'] <= e['price_eur_per_pot'] <= e['price_high'] < 10
     assert 0 < e['plant_cost_eur'] < e['price_eur_per_pot']
+    for curve in (e['gains_curve_low'], e['gains_curve_high']):
+        grams = [g for g, _ in curve]
+        assert grams == sorted(grams) and curve[-1][0] == e['red_cap_g']
+    assert e['gains_curve_low'][-1][1] == e['price_eur_per_pot']
+    assert e['gains_curve_high'][-1][1] == e['price_high']
+    assert 0 < e['respacing_cost_eur_m2_year'] < 10
     assert 0.5 <= e['earliest_sellable_share'] <= 1
     assert 0.5 <= e['harvest_now_share'] <= e['earliest_sellable_share']
     assert e['area_m2'] == 96.0                      # paper §2.2
@@ -69,9 +75,10 @@ def test_assumption_keys_resolve(cfg):
 
 def _price(cfg, red_g, dry_matter_pct):
     """Price per pot from the paper's Fig. 3 lines: interpolate by red grams, then by dry matter 7 -> 8 %."""
-    s = cfg['scoring_verified']
-    lo = np.interp(red_g, s['price_curve_red_g'], s['price_curve_low_dm'], left=0.0)
-    hi = np.interp(red_g, s['price_curve_red_g'], s['price_curve_high_dm'], left=0.0)
+    e = cfg['economics']
+    lo_pts, hi_pts = np.array(e['gains_curve_low']), np.array(e['gains_curve_high'])
+    lo = np.interp(red_g, lo_pts[:, 0], lo_pts[:, 1])
+    hi = np.interp(red_g, hi_pts[:, 0], hi_pts[:, 1])
     w = min(max(dry_matter_pct - 7.0, 0.0), 1.0)
     return lo + w * (hi - lo)
 
@@ -88,8 +95,10 @@ def test_price_curve_reproduces_paper_table1_gains(cfg):
 
 
 def test_price_curve_shape(cfg):
-    """Below 50 g nothing; at 80 g EUR 1.60 (low dry matter); 115 g is halfway 80->150: 1.60 + 0.5 * 0.20 = 1.70."""
+    """Below 50 g nothing; 65 g is halfway 50->80: 0.5 * 1.60 = 0.80; at 80 g EUR 1.60 (low dry matter);
+    115 g is halfway 80->150: 1.60 + 0.5 * 0.20 = 1.70; above the cap the full price."""
     assert _price(cfg, 40, 6.5) == 0.0
+    assert _price(cfg, 65, 6.5) == pytest.approx(0.80)
     assert _price(cfg, 80, 6.5) == pytest.approx(1.60)
     assert _price(cfg, 115, 6.5) == pytest.approx(1.70)
-    assert _price(cfg, 400, 6.5) == pytest.approx(cfg['scoring_verified']['price_eur_per_pot'])
+    assert _price(cfg, 400, 6.5) == pytest.approx(cfg['economics']['price_eur_per_pot'])

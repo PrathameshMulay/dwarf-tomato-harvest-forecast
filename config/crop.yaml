@@ -6,9 +6,7 @@
 # "Paper" = Maree et al. 2025, Sensors 25(14):4321, doi:10.3390/s25144321 (checked in a browser 14 Nov 2026).
 # Keys match tests/fixtures/crop.yaml; values marked PROPOSED are G1 decisions.
 #
-# NOTE (D9 / L05 Blocked): two SPEC §5 values differ from the paper (price, re-spacing cost).
-# The keys under `economics:` keep the SPEC values until the integrator decides; the paper's
-# values are under `scoring_verified:` so L02 can switch with one line.
+# D10 (14 Nov 2026): price and re-spacing cost now follow the paper, as approved by the user.
 
 crop: dwarf tomato (potted, sold as whole pots)   # Paper §2.2: 'Pick-&-Joy Red Cherry', 13 cm pots
 planted: 2024-09-03          # Paper §2.1: transplanting on 3 Sep 2024 (all rooms)
@@ -25,33 +23,26 @@ ripeness:
 economics:
   sellable_red_share: 0.3333 # Paper §2.5 and §3.1: unsellable if under one third of fruit (by weight) is red. VERIFIED
   red_cap_g: 150.0           # Paper §3.1 and Fig. 3: red fruit above 150 g per pot adds nothing. VERIFIED
-  price_eur_per_pot: 2.15    # SPEC §5 (main's back-out). Paper Fig. 3 says 1.80-2.00, see scoring_verified. UNDER REVIEW
-  price_low: 1.75            # SPEC §5 stress test. UNDER REVIEW
-  price_high: 2.50           # SPEC §5 stress test. UNDER REVIEW
+  # D10. Price per pot (before the EUR 0.75 plant cost) by red fruit grams per pot, read off Paper Fig. 3 (about ±EUR 0.02).
+  # Piecewise linear between points, flat beyond the last one (150 g cap). Zero up to 50 g (Paper §3.1 minimum), then a
+  # straight rise to 80 g; the line is continuous, so just above 50 g the price is just above zero.
+  # Low line applies at fruit dry matter <= 7 %, high at >= 8 % (linear in between, Fig. 3 caption). Dry matter is not
+  # in the data, so the low line is the main case (4 of 6 rooms were below 7 %, Table 1).
+  # Check: Table 1 gains per pot (price - plant cost) are reproduced for all six rooms (tests/test_settings.py).
+  gains_curve_low:  [[0, 0.0], [50, 0.0], [80, 1.60], [150, 1.80]]   # EUR per pot, dry matter <= 7 %. VERIFIED
+  gains_curve_high: [[0, 0.0], [50, 0.0], [80, 1.80], [150, 2.00]]   # EUR per pot, dry matter >= 8 %. VERIFIED
+  price_eur_per_pot: 1.80    # Paper Fig. 3: full-value price, low line at 150 g. VERIFIED
+  price_low: 1.80            # D10: main case is already the low dry-matter line
+  price_high: 2.00           # Paper Fig. 3: full-value price at dry matter >= 8 %
   plant_cost_eur: 0.75       # Paper §2.5: seed, pot, soil and propagation, EUR 0.75 per pot. VERIFIED
-  respacing_cost_eur_m2: 1.50  # SPEC §5 one-off charge. Paper §2.5: EUR 1.50 per m2 PER YEAR per step, see scoring_verified. UNDER REVIEW
+  respacing_cost_eur_m2_year: 1.50  # Paper §2.5: per spacing step, per m2 per year, inside daily fixed costs (not one-off). VERIFIED
+  # Other paper costs, for reference (room logs already carry running costs; totals are 4-7 % below Table 1):
+  #   fixed EUR 18.125/m2/year; lamps EUR 0.07 per µmol/(m2 s) installed per year; EUR 0.10/pot per intervention (§2.6, not used).
+  #   Table 1 "average density" = harmonic mean, 1 / mean(1/density).
   cost_rate_days: 7          # Team choice (SPEC §5): future daily cost = mean of the last 7 days of the room log
   earliest_sellable_share: 0.95   # PROPOSED (SPEC §5): "earliest sellable day" = this share of pots sellable
   harvest_now_share: 0.90         # PROPOSED: status harvest_now needs at least this share sellable today
   area_m2: 96.0                   # Paper §2.2: six equal compartments of 96 m2. VERIFIED
-
-# What the paper actually says (Fig. 3, §2.5, Table 1). Not yet used by the model; see docs/assumptions.md §2.
-scoring_verified:
-  # Price per pot (before the EUR 0.75 plant cost) by red fruit weight per pot, read off Fig. 3 (about ±EUR 0.02).
-  # Straight lines between points; zero below 50 g; flat above 150 g.
-  # Low line applies at fruit dry matter <= 7 %, high line at >= 8 %, linear in between (Fig. 3 caption).
-  price_curve_red_g: [50.0, 80.0, 150.0]
-  price_curve_low_dm: [0.00, 1.60, 1.80]
-  price_curve_high_dm: [0.00, 1.80, 2.00]
-  price_eur_per_pot: 1.80    # full-value price at dry matter <= 7 % (4 of 6 rooms; dry matter is not in our data)
-  price_low: 1.60            # stress test: EUR 0.20 below full value (our choice, not from the paper)
-  price_high: 2.00           # full-value price at dry matter >= 8 %
-  min_red_g: 50.0            # Paper §3.1: at least 50 g red fruit per pot, else no gains
-  respacing_eur_m2_per_year: 1.50   # Paper §2.5: per spacing step, part of daily fixed costs
-  fixed_eur_m2_per_year: 18.125     # Paper §2.5: maintenance and depreciation (about EUR 0.05/m2/day)
-  lamp_eur_per_umol_year: 0.07      # Paper §2.5: lamp depreciation per µmol/(m2 s) installed, per year
-  intervention_penalty_eur_pot: 0.10  # Paper §2.6: charged in the challenge, left out of the paper's results
-  density_average: harmonic  # Table 1 "Avg. plant density" = 1 / mean(1/density); our data reproduces all six to 0.1 pots/m2
 
 confidence:                  # PROPOSED thresholds (team choice, G1); level = worst of the three parts
   day_range_high_max: 4      # best-day range (days) at most this -> high
@@ -82,17 +73,17 @@ assumptions:
   - name: Price per pot at full value
     key: economics.price_eur_per_pot
     unit: EUR per pot
-    source: Backed out from published profits (team estimate); paper's price chart shows EUR 1.80-2.00, under review
-    if_wrong: Profit level changes; best day barely moves (tested EUR 1.75-2.50).
+    source: Challenge price chart, Maree et al. 2025 Fig. 3 (verified; EUR 2.00 if fruit dry matter is 8 % or more)
+    if_wrong: Profit level changes; best day barely moves.
   - name: Plant cost
     key: economics.plant_cost_eur
     unit: EUR per pot
     source: Challenge rules, Maree et al. 2025 §2.5 (verified)
     if_wrong: Profit level shifts by the same amount per pot; best day does not move.
   - name: Re-spacing cost
-    key: economics.respacing_cost_eur_m2
-    unit: EUR per m2 per step
-    source: Team reading of the rules; paper says EUR 1.50 per m2 per year per step, under review
+    key: economics.respacing_cost_eur_m2_year
+    unit: EUR per m2 per year, per step
+    source: Challenge rules, Maree et al. 2025 §2.5 (verified)
     if_wrong: Spacing is done before harvest decisions, so profit level changes but best day barely moves.
   - name: Room area
     key: economics.area_m2
