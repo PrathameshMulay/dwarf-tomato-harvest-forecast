@@ -13,11 +13,16 @@ ripeness:
 economics:
   sellable_red_share: 0.3333 # a pot sells only if at least this share of fruit weight is red
   red_cap_g: 150.0           # red fruit above this per pot adds no revenue
-  price_eur_per_pot: 2.15
-  price_low: 1.75
-  price_high: 2.50
+  # D10: verified against Maree et al. 2025 (Fig. 3, Table 1). Price per pot depends on red fruit grams,
+  # piecewise linear between these points; dry matter is not in the data, so 'low' (<=7% DM) is the main case.
+  # Exact points: L05 confirms from Fig. 3.
+  gains_curve_low:  [[0, 0.0], [49.99, 0.0], [80, 1.60], [150, 1.80]]   # EUR per pot, dry matter <= 7%
+  gains_curve_high: [[0, 0.0], [49.99, 0.0], [80, 1.80], [150, 2.00]]   # EUR per pot, dry matter >= 8%
+  price_eur_per_pot: 1.80    # full-value price, main case (low curve at 150 g)
+  price_low: 1.80
+  price_high: 2.00
   plant_cost_eur: 0.75
-  respacing_cost_eur_m2: 1.50
+  respacing_cost_eur_m2_year: 1.50   # per spacing step, charged per m2 per year as a fixed cost (not one-off)
   cost_rate_days: 7
   earliest_sellable_share: 0.95   # PROPOSED: "earliest sellable day" = this share of pots sellable
   harvest_now_share: 0.90         # PROPOSED: status harvest_now needs at least this share sellable today
