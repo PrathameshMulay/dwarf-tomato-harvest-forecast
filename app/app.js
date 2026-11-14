@@ -131,6 +131,8 @@
     const p = new URLSearchParams(location.hash.slice(1));
     S.view = ['home', 'room', 'alerts', 'how'].includes(p.get('view')) ? p.get('view') : 'home';
     S.room = p.get('room');
+    const owner = S.room && idx.rooms.get(S.room);
+    if (owner && !p.get('c')) S.customer = owner.customer_id;   // deep link to a room opens its own customer
     if (p.get('c') && idx.customers.some((c) => c.customer_id === p.get('c'))) S.customer = p.get('c');
     if (!S.customer) S.customer = idx.customers[0].customer_id;
     const t = p.get('t');
@@ -195,7 +197,7 @@
     $('#alert-count').textContent = n ? String(n) : '';
     $('#mock-flag').hidden = !S.mock;
     const m = S.data.days.meta;
-    $('#data-source').textContent = `Source: ${m.source}. Built ${m.built_at}. Replay dates ${short(m.as_of.from)}–${short(m.as_of.to)}.`;
+    $('#data-source').textContent = `Source: ${m.source}. Built ${short(m.built_at.slice(0, 10))}. Replay dates ${short(m.as_of.from)}–${short(m.as_of.to)}.`;
   }
 
   /* ---------- shared bits ---------- */
@@ -327,7 +329,7 @@
           <div class="parts">
             <div class="part"><div class="part-k">Day range</div><div class="part-v">${plural(d.conf_day_range_days, 'day')}</div><div class="part-s">Likely range of the best day (${span2(d.best_day_low, d.best_day_high)}). Narrower is better.</div></div>
             <div class="part"><div class="part-k">Evidence agreement</div><div class="part-v">${(AGREE[d.conf_agreement] || ['—'])[0]}</div><div class="part-s">${(AGREE[d.conf_agreement] || ['', ''])[1]}</div></div>
-            <div class="part"><div class="part-k">Freshness</div><div class="part-v">${plural(d.conf_freshness_days, 'day')}</div><div class="part-s">Since the newest crop sample or usable photo, whichever is older.</div></div>
+            <div class="part"><div class="part-k">Freshness</div><div class="part-v">${plural(d.conf_freshness_days, 'day')}</div><div class="part-s">Days since the last crop sample or the last photo, whichever was longer ago.</div></div>
           </div>
           <h3>Why</h3>
           <ul class="reasons">${(d.conf_reasons || []).map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
@@ -386,8 +388,8 @@
     return `<div class="evidence">${photo}
       <dl class="ev">
         <dt>Noon photo</dt><dd>${short(ev.date)} · ${ev.photo_usable ? 'usable' : 'not usable'}${ev.lamps_on == null ? '' : ev.lamps_on ? ' · lamps on' : ' · lamps off'}</dd>
-        <dt>Red fruit in photo</dt><dd>${v(ev.red_index, '% of image')}</dd>
-        <dt>Green leaf in photo</dt><dd>${v(ev.green_pct, '%')}</dd>
+        <dt>Red fruit in photo</dt><dd>${ev.red_index == null ? '—' : (+ev.red_index).toFixed(1) + '% of image'}</dd>
+        <dt>Green leaf in photo</dt><dd>${ev.green_pct == null ? '—' : (+ev.green_pct).toFixed(1) + '%'}</dd>
         <dt>Camera to canopy</dt><dd>${ev.canopy_distance_mm == null ? '—' : Math.round(ev.canopy_distance_mm) + ' mm'}</dd>
         <dt>Warmth since planting</dt><dd>${ev.gdd_cum == null ? '—' : Math.round(ev.gdd_cum) + ' degree-days'}</dd>
         <dt>Last crop sample</dt><dd>${sample}</dd>
@@ -402,7 +404,7 @@
     const out = $('#wi-out');
     if (!w) { out.innerHTML = '<p class="muted">No what-if result for this day.</p>'; return; }
     const shift = w.days_change === 0 ? 'no change' : `${plural(Math.abs(w.days_change), 'day')} ${w.days_change < 0 ? 'earlier' : 'later'}`;
-    const fit = S.data.whatif.meta.heating_fit;
+    const fit = (S.data.whatif.meta.heating_fit_by_today || {})[S.today] || S.data.whatif.meta.heating_fit;   // the fit used for today's numbers
     out.innerHTML = `
       <p class="finding">${dc === 0 ? 'Move the slider to see the estimated effect.' : `Running ${Math.abs(dc).toFixed(1)} °C ${dc > 0 ? 'warmer' : 'cooler'} moves the best day to ${day(w.best_day)} (${shift}).`}</p>
       <div class="wi-out">
@@ -410,7 +412,7 @@
         <div class="part"><div class="part-k">Profit change</div><div class="part-v">${signedEuro(w.profit_change_m2_day, 3)}</div><div class="part-s">per m² per day grown (now ${euro(w.profit_best_m2_day)})</div></div>
         <div class="part"><div class="part-k">Extra heating</div><div class="part-v">${signedEuro(w.extra_energy_cost_m2_day, 3)}</div><div class="part-s">per m² per day${area ? ` · ${signedEuro(w.extra_energy_cost_m2_day * area)} per day for this room` : ''}</div></div>
       </div>
-      <p class="note">${esc(w.note)}${fit && fit.r2 != null ? ` Heating cost per °C estimated across rooms (fit quality R² ${fit.r2}, ${fit.n} rooms).` : ''}</p>`;
+      <p class="note">${esc(w.note)}${fit && fit.r2 != null ? ` Heating cost per °C: a rough, probably low estimate from ${fit.n} heated room-days (fit quality ${(+fit.r2).toFixed(2)}, weak).` : ''}</p>`;
   }
 
   /* ---------- charts ---------- */
@@ -556,7 +558,7 @@
     const recent = recentAlerts(c.rooms).length;
     main.innerHTML = `
       <div class="page-head"><h1>Alerts</h1>
-        <p class="lede">${plural(recent, 'alert')} in the last ${ALERT_DAYS} days up to ${day(S.today)}, across ${esc(c.name)}'s rooms. Older ones are listed below for the record.</p></div>
+        <p class="lede">${plural(recent, 'alert')} in the last ${ALERT_DAYS} days up to ${day(S.today)}, across the rooms at ${esc(c.name)}. Older ones are listed below for the record.</p></div>
       ${list.length ? `<ul class="alert-list">${list.map(alertItem).join('')}</ul>` : '<p class="empty">No alerts up to this day.</p>'}
       <p class="caption">Kinds: behind or ahead of schedule (photo or crop sample outside the forecast range), sensor check (missing, flat or out-of-range readings), room drifting (gaining warmth much slower than the other rooms). Disease detection is not in this version. Source: alerts.json.</p>`;
   }
@@ -587,14 +589,14 @@
     const asm = S.data.assumptions.rows;
     main.innerHTML = `
       <div class="page-head"><h1>How it works &amp; limits</h1>
-        <p class="lede">The app replays a real greenhouse trial day by day, as if it were live. For each room it estimates how ripe the fruit is, when picking pays best, and how sure it is. Each room's forecast is made without that room's own hand measurements, using only data up to "today".</p></div>
+        <p class="lede">The app replays a real greenhouse trial day by day, as if it were live. For each room it estimates how ripe the fruit is, when picking pays best, and how sure it is. The ripening curve is learned on the other rooms, using only data up to "today"; once this room has a crop sample, the curve is nudged toward it.</p></div>
       <section class="section"><h2>The logic in plain words</h2>
         <ol class="steps">
           <li><b>Warmth clock.</b> Tomatoes ripen with accumulated warmth. Each day adds its average temperature above a base temperature ("degree-days"). A ripening curve learned on the other rooms turns warmth into % of fruit that is red.</li>
           <li><b>Camera check.</b> A daylight noon photo shows when red fruit first appears. That anchors the curve for this room. Lamp-lit photos are purple and are skipped.</li>
           <li><b>Crop samples.</b> When growers weigh a few plants, the curve is pulled towards what they found.</li>
           <li><b>Pots ready to sell.</b> Pots in a room ripen at different speeds. From the spread between plants we estimate the share of pots that would sell on each day.</li>
-          <li><b>Harvest window.</b> Using the challenge's scoring rules (assumed until verified), we estimate profit per m² per day grown for each of the coming days: earliest sellable day, best day, and the day losses start.</li>
+          <li><b>Harvest window.</b> Using the challenge's scoring rules (checked against Maree et al. 2025), we estimate profit per m² per day grown for each of the coming days: earliest sellable day, best day, and the day losses start.</li>
           <li><b>How sure we are.</b> The weakest of three checks: how wide the best-day range is, whether warmth, camera and sample agree, and how fresh the evidence is.</li>
         </ol></section>
       <section class="card section"><h2>Timing test: how good is it, honestly?</h2>
@@ -618,7 +620,7 @@
       <section class="card section"><h2>Data and credits</h2>
         <ul class="limits">
           <li>Dataset: 4th Autonomous Greenhouse Challenge, dwarf tomato (Maree et al., 4TU.ResearchData), licence CC BY 4.0. Climate logs, outside weather, canopy photos and hand measurements.</li>
-          <li>Builds on our team's earlier work: ripening curve, photo onset and profit model (main branch); crop-sample check and mean baseline ideas (harvest-window planner branch), reused with credit.</li>
+          <li>Builds on our team's earlier work: ripening curve, photo onset and profit model from the main project (Prathamesh Mulay); crop-sample check and mean-baseline ideas from the HarvestWindow planner (Chaitanya Nirantar). Scoring rules: Maree et al. 2025, Sensors 25:4321.</li>
           <li>Built for the UIUC CDA Precision &amp; Digital Agriculture Hackathon (Track 1, Challenge 2).</li>
         </ul></section>`;
   }

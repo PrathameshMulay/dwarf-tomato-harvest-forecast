@@ -37,3 +37,9 @@ Day range: High ≤ 7 days, Medium ≤ 12 (was 4 / 8). Freshness: High ≤ 7 day
 3. Two photo rules, named apart: evidence `photo_usable` = lamps known off at noon (colour reliable to the eye); confidence freshness counts any noon photo with a lamp-corrected red index. MuGrow is lamp-lit at noon every day, so the stricter rule would make its camera evidence always stale.
 4. Contract additions: per-part confidence levels, `whatif.meta.heating_fit`, photo paths relative to `app/index.html`.
 5. Sensor plausibility ranges moved into `config/crop.yaml` (`alerts.ranges`).
+
+## D13 · Agreement compares camera with crop sample once both exist
+
+14 Nov 2026 · SPEC §4, `harvest/confidence.py` · L01, L04
+
+Once a room has both a photo-timed estimate and a crop sample, the agreement check compares those two; the warmth-only model is shown as context. Before that, warmth is compared with whichever exists. Reason (L06 S5): warmth-only is our weakest method in the timing test (3.0 days off vs 1.7), yet it alone kept Bay A (IDEAS) at "Check crop / Low" every day from 5 Nov to harvest. Approved by the user. Also from the L06 review: reason labels now say "photo-timed estimate" and "latest crop sample carried to today"; the timing test is labelled as the date a room reaches the ripeness it was picked at.

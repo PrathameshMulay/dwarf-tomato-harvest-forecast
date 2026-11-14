@@ -49,14 +49,18 @@ def estimates_today(inputs: Inputs, room: str, today: date, params: dict) -> dic
 
 
 def agreement(est: dict[str, float], agree_points: float, conflict_points: float) -> tuple[str, float]:
-    """('agree' | 'mixed' | 'conflict', biggest gap in points) across the available estimates.
+    """('agree' | 'mixed' | 'conflict', gap in points) between the sources that are compared.
 
-    One source alone can't be cross-checked, so it counts as 'mixed'.
-    Hand check: {warmth 40, camera 48, sample 52}, agree 10, conflict 20 -> gap 12 -> 'mixed'.
+    D13: once both the photo-timed estimate and a crop sample exist, they are compared with each other
+    and the warmth-only model (our weakest method in the timing test) is context only. Before that,
+    the warmth model is compared with whichever of the two exists. One source alone counts as 'mixed'.
+    Hand checks: {warmth 40, camera 48, sample 52} -> camera vs sample, gap 4 -> 'agree';
+    {warmth 40, camera 65} -> gap 25 -> 'conflict'.
     """
     if len(est) < 2:
         return 'mixed', 0.0
-    gap = max(est.values()) - min(est.values())
+    used = {k: est[k] for k in ('camera', 'sample')} if {'camera', 'sample'} <= est.keys() else est
+    gap = max(used.values()) - min(used.values())
     return ('agree' if gap <= agree_points else 'conflict' if gap > conflict_points else 'mixed'), float(gap)
 
 
@@ -106,14 +110,16 @@ def confidence(inputs: Inputs, room: str, today: date, settings: dict | None = N
     est = estimates_today(inputs, room, today, p)
     agree, gap = agreement(est, c['agree_points'], c['conflict_points'])
     lvl_agree = {'agree': 'high', 'mixed': 'medium', 'conflict': 'low'}[agree]
-    names = {'warmth': 'warmth model', 'camera': 'camera', 'sample': 'crop sample'}
+    names = {'warmth': 'warmth model', 'camera': 'photo-timed estimate', 'sample': 'latest crop sample carried to today'}
     listed = ', '.join(f'{names[s]} {v:.0f}%' for s, v in est.items())
     if len(est) < 2:
         why_agree = 'Only the warmth model so far; camera has not seen ripening and no ripe crop sample yet'
-    elif agree == 'agree':
-        why_agree = f'Sources agree on ripeness today ({listed})'
     else:
-        why_agree = f'Sources {"disagree" if agree == "conflict" else "differ"} by {gap:.0f} points on ripeness today ({listed})'
+        both = {'camera', 'sample'} <= est.keys()   # D13: then only these two are compared
+        who = 'Photo-timed estimate and crop sample' if both else 'Sources'
+        verb = 'agree' if agree == 'agree' else 'disagree' if agree == 'conflict' else 'differ'
+        why_agree = (f'{who} agree on ripeness today ({listed})' if agree == 'agree'
+                     else f'{who} {verb} by {gap:.0f} points on ripeness today ({listed})')
 
     fresh, s_days, p_days = freshness(inputs, room, today)
     lvl_fresh = rate_low_is_good(fresh, c['fresh_high_max'], c['fresh_medium_max'])

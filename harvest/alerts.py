@@ -143,7 +143,7 @@ def camera_schedule_alerts(room: str, images: pd.DataFrame, days: list[date], fo
     for start, end in runs(flags):
         (mid, low, high), red = info[start]
         out.append(_alert(room, start, 'behind_schedule', 'info', 'Camera sees little red fruit',
-                          f'The last {n} usable noon photos show almost no red fruit, while the model estimated at '
+                          f'The last {n} daylight noon photos show almost no red fruit, while the model estimated at '
                           f'least {low:.0f}% red by {_fmt(start)}; check the crop before planning the harvest.',
                           {'max_red_index': _r(red, 3), 'onset_red_index': thr, 'forecast_low': _r(low),
                            'forecast_pct_red': _r(mid), 'photos_checked': n, 'until': end.isoformat()}))

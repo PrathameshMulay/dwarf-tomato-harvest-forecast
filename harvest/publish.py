@@ -139,7 +139,8 @@ def main() -> int:
     write('rooms', rooms, as_of)
     write('days', cards, as_of)
     write('forecast', fc_rows, as_of)
-    write('whatif', wi_rows, as_of, heating_fit=heat_by_day[todays[-1]])
+    write('whatif', wi_rows, as_of, heating_fit=heat_by_day[todays[-1]],
+          heating_fit_by_today={t.isoformat(): h for t, h in heat_by_day.items()})   # L06 S1: caption matches the day's numbers
     write('evidence', evidence_rows(inputs), as_of)
     write('alerts', alerts(inputs, settings), as_of)
     write('backtest', summary.to_dict('records'), as_of, per_room=per_room)

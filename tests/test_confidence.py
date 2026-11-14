@@ -18,8 +18,10 @@ def test_day_range_hand_value():
 
 
 @pytest.mark.parametrize('est, expected', [
-    ({'warmth': 40, 'camera': 48, 'sample': 45}, ('agree', 8.0)),      # gap 8 <= 10
-    ({'warmth': 40, 'camera': 48, 'sample': 52}, ('mixed', 12.0)),     # 10 < 12 <= 20
+    ({'warmth': 40, 'camera': 48, 'sample': 45}, ('agree', 3.0)),      # D13: camera vs sample, gap 3 <= 10
+    ({'warmth': 40, 'camera': 48, 'sample': 52}, ('agree', 4.0)),      # D13: camera vs sample only, gap 4
+    ({'warmth': 20, 'camera': 48, 'sample': 60}, ('mixed', 12.0)),     # D13: warmth ignored; 10 < 12 <= 20
+    ({'warmth': 40, 'sample': 55}, ('mixed', 15.0)),                   # no camera yet: warmth vs sample
     ({'warmth': 40, 'camera': 65}, ('conflict', 25.0)),                # 25 > 20
     ({'warmth': 40}, ('mixed', 0.0)),                                  # one source can't be cross-checked
 ])
@@ -54,7 +56,7 @@ def test_low_when_camera_conflicts(inputs, settings):
     p['g50_camera'] = p['g50_warmth'] - 100
     c = confidence(inputs, 'mugrow', date(2024, 11, 5), settings, params=p)
     assert c['level'] == 'low' and c['agreement'] == 'conflict'
-    assert c['reasons'][0].startswith('Sources disagree by')
+    assert 'disagree by' in c['reasons'][0]   # D13 wording names the compared sources
 
 
 def test_low_before_any_ripe_sample(inputs, settings):

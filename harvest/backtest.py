@@ -74,7 +74,7 @@ def summarise(per_room: list[dict]) -> pd.DataFrame:
     Hand check: errors [-2, 1, 3] -> (2 + 1 + 3) / 3 = 2.0.
     """
     df = pd.DataFrame(per_room)
-    labels = {'harvest_date': ('Harvest date, forecast on 5 Nov: average days off', 'days'),
+    labels = {'harvest_date': ('When the room reaches the ripeness it was picked at, forecast on 5 Nov: average days off', 'days'),
               'pct_red_at_harvest': ('% red at harvest, forecast on 5 Nov: average points off', '% red points')}
     out = []
     for test, g in df.groupby('test', sort=False):
