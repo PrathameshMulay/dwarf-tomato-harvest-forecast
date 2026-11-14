@@ -50,6 +50,7 @@ function projectSample(source, redPercent, fruitGrams) {
   const near = choices.filter((choice) => choice === 0).length;
   const later = choices.length - near;
   return {
+    fruitGrams,
     action: near && later ? "sample" : (near ? "harvest" : "wait"),
     near, later, selected: bestDay(central),
     window: eligible.length ? [Math.min(...eligible), Math.max(...eligible)] : null,

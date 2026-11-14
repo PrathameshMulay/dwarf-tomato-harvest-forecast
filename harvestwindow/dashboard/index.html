@@ -17,11 +17,13 @@
   <script defer src="journal.js"></script>
   <script defer src="ml-data.js"></script>
   <script defer src="ml-comparison.js"></script>
+  <script defer src="market.js"></script>
+  <script defer src="market-ui.js"></script>
 </head>
 <body>
   <header class="masthead">
     <a class="brand" href="#planner"><span class="brand-mark" aria-hidden="true">✦</span> HarvestWindow</a>
-    <nav aria-label="Sections"><a href="#planner">Planner</a><a href="#orders">Orders</a><a href="#operations">Operations</a><a href="#journal">Tasks</a><a href="#evidence">Backtest</a></nav>
+    <nav aria-label="Sections"><a href="#planner">Planner</a><a href="#market">Market</a><a href="#orders">Orders</a><a href="#operations">Operations</a><a href="#journal">Tasks</a><a href="#evidence">Backtest</a></nav>
   </header>
   <main id="planner">
     <div class="intro">
@@ -78,6 +80,28 @@
       <p id="risk-summary"></p><p id="sample-value"></p>
       <details><summary>Compare all candidate days</summary><div class="table-scroll"><table id="economics-table"><thead><tr><th>Date</th><th>Sales</th><th>Future costs</th><th>Space cost</th><th>Value vs today</th><th>Sellable</th></tr></thead><tbody></tbody></table></div></details>
       <p class="note">Conditional scenarios from the initial forecast. Existing cultivation costs are sunk for this decision. Crop-state scenarios receive equal weight. Sample noise assumes 15 percentage points of plant variation plus 3 points of measurement uncertainty. Prices, crop weight, and space value are entered assumptions. This analysis estimates the value of information within the model.</p>
+    </section>
+    <section id="market" class="panel evidence">
+      <p class="eyebrow">Living potted dwarf tomatoes</p>
+      <h2>Harvest-to-Market Planner</h2>
+      <p>Compare shipment schedules for the selected greenhouse and its current crop forecast. All shipment inputs start with illustrative assumptions. Enter road distance and travel time separately.</p>
+      <div class="tabs" id="market-presets" aria-label="Illustrative routes">
+        <button type="button" data-route="local">Local · 30 km</button>
+        <button type="button" data-route="regional">Regional · 400 km</button>
+        <button type="button" data-route="long">Long · 1,000 km</button>
+      </div>
+      <form id="market-form"></form>
+      <h3 id="market-order"></h3>
+      <p id="market-result" aria-live="polite"></p>
+      <p id="market-comparison"></p>
+      <p class="note" id="market-costs"></p>
+      <div class="table-scroll"><table id="market-scenarios"></table></div>
+      <details><summary>Compare harvest dates and shipment economics</summary>
+        <label>Chart metric <select id="market-metric"><option value="profit">Net contribution (€)</option><option value="red">Arrival ripeness (%)</option><option value="freight">Freight (€)</option></select></label>
+        <canvas id="market-chart" role="img" aria-label="Selected metric by harvest day. Exact values are in the next table." style="width:100%;height:220px"></canvas>
+        <div class="table-scroll channel-history"><table id="market-days"></table></div>
+      </details>
+      <p class="note">Arrival condition uses a provisional live-plant simulator. The trial contains no measured shipment outcomes. Scenario weights are illustrative. All three arrivals must meet the delivery window. The expected scenario must pass quality, display life, and rejection limits. The timestamps use a shared planning clock.</p>
     </section>
 <section id="orders" class="panel evidence">
 <p class="eyebrow">Six-room order planning</p><h2>Can we deliver the order?</h2>

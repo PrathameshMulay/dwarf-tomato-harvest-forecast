@@ -104,3 +104,7 @@ footer { display: flex; justify-content: space-between; gap: 12px; padding: 20px
 .channel-history { max-height: 360px; overflow: auto; }
 #journal-message { color: #266248; }
 nav { flex-wrap: wrap; }
+.market-fields { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.market-fields label { display: grid; align-content: start; min-width: 0; gap: .4rem; font-size: 13px; }
+.market-fields input:not([type="checkbox"]) { width: 100%; padding: .55rem; border: 1px solid var(--line); border-radius: 6px; }
+.market-fields input[type="checkbox"] { justify-self: start; }

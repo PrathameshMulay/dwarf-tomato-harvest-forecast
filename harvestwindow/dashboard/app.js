@@ -167,6 +167,7 @@ function render() {
   $("ripeness").textContent = percent(plan.points[0].red);
   renderCamera(source);
   renderEconomics(source);
+  document.dispatchEvent(new Event("harvestwindow:forecast"));
   drawChart();
 }
 

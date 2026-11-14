@@ -9,6 +9,17 @@ const assert = require('node:assert/strict');
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     await page.goto(pathToFileURL(path.resolve(__dirname,'../dashboard/index.html')).href);
     await page.waitForSelector('#operations-table tbody tr');
+    assert.match(await page.locator('#market-result').textContent(), /Harvest 2024-11-14/);
+    await page.click('[data-route="long"]');
+    assert.match(await page.locator('#market-result').textContent(), /Harvest 2024-11-12/);
+    await page.click('[data-route="local"]');
+    await page.fill('#market-form [name=quantity]', '10000');
+    assert.match(await page.locator('#market-result').textContent(), /capacity/);
+    await page.fill('#market-form [name=quantity]', '500');
+    await page.locator('#sample-entry summary').click();
+    await page.fill('#sample-form [name=grams]', '10');
+    await page.click('#sample-form button');
+    assert.match(await page.locator('#market-result').textContent(), /rejection limit/);
     assert.equal(await page.locator('#ml-metrics tbody tr').count(),10);
     for (const model of ['xgboost', 'xgboost_heat', 'hybrid', 'hierarchical']) {
       await page.selectOption('#ml-model', model);
