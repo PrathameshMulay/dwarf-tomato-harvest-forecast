@@ -653,7 +653,7 @@ Rules:
         <div class="part"><div class="part-k">Profit change</div><div class="part-v">${signedEuro(w.profit_change_m2_day, 3)}</div><div class="part-s">per m² per day grown (now ${euro(w.profit_best_m2_day)})</div></div>
         <div class="part"><div class="part-k">Extra heating</div><div class="part-v">${signedEuro(w.extra_energy_cost_m2_day, 3)}</div><div class="part-s">per m² per day${area ? ` · ${signedEuro(w.extra_energy_cost_m2_day * area)} per day for this room` : ''}</div></div>
       </div>
-      <p class="note">${esc(w.note)}${fit && fit.r2 != null ? ` Heating cost per °C: a rough, probably low estimate from ${fit.n} heated room-days (fit quality ${(+fit.r2).toFixed(2)}, weak).` : ''}</p>`;
+      <p class="note">${esc([S.data.whatif.meta.note, w.note].filter(Boolean).join(' '))}${fit && fit.r2 != null ? ` Heating cost per °C: a rough, probably low estimate from ${fit.n} heated room-days (fit quality ${(+fit.r2).toFixed(2)}, weak).` : ''}</p>`;
   }
 
   /* ---------- charts ---------- */

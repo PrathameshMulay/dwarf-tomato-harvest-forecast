@@ -58,7 +58,7 @@ Dates are `"YYYY-MM-DD"` strings. Numbers are plain JSON numbers (no NaN; use `n
 ### `evidence.json` — one row per room × date (from planting to day before harvest)
 `room, date, photo (path relative to `app/index.html`, e.g. `data/photos/x.jpg`, or null), photo_usable (bool), lamps_on (bool|null), red_index, green_pct, canopy_distance_mm, gdd_cum, last_sample_date, last_sample_pct_red, last_sample_fw_g`
 
-`meta.heating_fit` = `{eur_m2_day_per_c, r2, n, note}` from `heating_cost_per_degree` (added at G2).
+`meta.note` = the what-if caveat shared by every row; each row's `note` holds only its own extra text (may be empty). `meta.heating_fit` = `{eur_m2_day_per_c, r2, n, note}` from `heating_cost_per_degree` (added at G2).
 
 ### `alerts.json`
 `room, date, kind (behind_schedule|ahead_of_schedule|sensor_check|room_drift), severity (info|warning), title, message, numbers (object of the values behind it)`

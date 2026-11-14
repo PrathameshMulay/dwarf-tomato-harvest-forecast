@@ -87,7 +87,7 @@ def check_data(folder: Path) -> list[str]:
             errs.append(f'evidence photo path not relative: {r["photo"]}')
             break
     size = sum(p.stat().st_size for p in folder.rglob('*') if p.is_file() and p.suffix != '.py')
-    if size > 5 * 1024 * 1024:
+    if size > 5_000_000:   # CLAUDE.md: under 5 MB (decimal), not 5 MiB
         errs.append(f'{folder.name}/ is {size / 1e6:.1f} MB (limit 5 MB)')
     return errs
 

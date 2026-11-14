@@ -26,7 +26,7 @@ from harvest.growth import weight_complete_day
 from harvest.shipping import ship_plan
 from harvest.logistics import transit_days
 from harvest.economics import Z
-from harvest.whatif import heating_cost_per_degree, whatif
+from harvest.whatif import NOTE as WHATIF_NOTE, heating_cost_per_degree, whatif
 
 OUT = REPO / 'app' / 'data'
 DELTAS = [-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0]
@@ -139,10 +139,23 @@ def assumptions_rows(settings: dict) -> list[dict]:
                  source=a['source'], if_wrong=a['if_wrong']) for a in settings.get('assumptions', [])]
 
 
+# Decimal places per published field: enough for what the app shows and for app/trip.js to reproduce the
+# shipping plans, no more (pct_red stays at 4 places: app/trip.js recomputes ship-by days from it) (keeps app/data under the 5 MB budget in CLAUDE.md). Fields not listed keep 4.
+DECIMALS = {'pct_red_low': 1, 'pct_red_high': 1, 'pct_red_now': 1, 'pct_at_pluck': 1, 'pct_on_arrival': 1,
+            'sellable_share': 3, 'sellable_share_now': 3, 'profit_m2_day': 3, 'profit_low': 3, 'profit_high': 3,
+            'cost_to_date_m2': 2, 'profit_best_m2_day': 3, 'profit_today_m2_day': 3, 'profit_change_m2_day': 3,
+            'red_index': 2, 'green_pct': 1, 'canopy_distance_mm': 0, 'gdd_cum': 1}
+
+
+def _rounded(row: dict) -> dict:
+    return {k: (round(float(v), DECIMALS[k]) if k in DECIMALS and isinstance(v, (float, np.floating)) and np.isfinite(v)
+                else v) for k, v in row.items()}
+
+
 def write(name: str, rows: list[dict], as_of: tuple[date, date], **meta) -> None:
     doc = {'meta': _iso(dict(source=SOURCE, built_at=datetime.now(timezone.utc).isoformat(timespec='seconds'),
                              as_of={'from': as_of[0], 'to': as_of[1]}, **meta)),
-           'rows': _iso(rows)}
+           'rows': _iso([_rounded(r) for r in rows])}
     (OUT / f'{name}.json').write_text(json.dumps(doc, separators=(',', ':'), allow_nan=False))
 
 
@@ -165,7 +178,9 @@ def main() -> int:
     write('rooms', rooms, as_of)
     write('days', cards, as_of)
     write('forecast', fc_rows, as_of)
-    write('whatif', wi_rows, as_of, heating_fit=heat_by_day[todays[-1]],
+    for r in wi_rows:   # the fixed opening sentence goes in meta.note once instead of on 1,494 rows;
+        r['note'] = r['note'].removeprefix(WHATIF_NOTE).replace(' Heating-cost fit is weak (r² below 0.3).', '').strip()
+    write('whatif', wi_rows, as_of, note=WHATIF_NOTE, heating_fit=heat_by_day[todays[-1]],
           heating_fit_by_today={t.isoformat(): h for t, h in heat_by_day.items()})   # L06 S1: caption matches the day's numbers
     write('evidence', evidence_rows(inputs), as_of)
     write('alerts', alerts(inputs, settings), as_of)
