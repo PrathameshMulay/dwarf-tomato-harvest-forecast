@@ -15,9 +15,9 @@ economics:
   red_cap_g: 150.0           # red fruit above this per pot adds no revenue
   # D10: verified against Maree et al. 2025 (Fig. 3, Table 1). Price per pot depends on red fruit grams,
   # piecewise linear between these points; dry matter is not in the data, so 'low' (<=7% DM) is the main case.
-  # Exact points: L05 confirms from Fig. 3.
-  gains_curve_low:  [[0, 0.0], [49.99, 0.0], [80, 1.60], [150, 1.80]]   # EUR per pot, dry matter <= 7%
-  gains_curve_high: [[0, 0.0], [49.99, 0.0], [80, 1.80], [150, 2.00]]   # EUR per pot, dry matter >= 8%
+  # Points checked by L05 against Fig. 3 (continuous: zero at 50 g, straight rise to 80 g).
+  gains_curve_low:  [[0, 0.0], [50, 0.0], [80, 1.60], [150, 1.80]]   # EUR per pot, dry matter <= 7%
+  gains_curve_high: [[0, 0.0], [50, 0.0], [80, 1.80], [150, 2.00]]   # EUR per pot, dry matter >= 8%
   price_eur_per_pot: 1.80    # full-value price, main case (low curve at 150 g)
   price_low: 1.80
   price_high: 2.00
@@ -26,7 +26,7 @@ economics:
   cost_rate_days: 7
   earliest_sellable_share: 0.95   # PROPOSED: "earliest sellable day" = this share of pots sellable
   harvest_now_share: 0.90         # PROPOSED: status harvest_now needs at least this share sellable today
-  area_m2: 96.0                   # PROPOSED: room area for euro totals (compartment size to be confirmed)
+  area_m2: 96.0                   # room area for euro totals (paper §2.2: 96 m2 compartments)
 confidence:                  # PROPOSED thresholds; level = worst of the three parts
   day_range_high_max: 4      # best-day range (days) at most this -> high
   day_range_medium_max: 8    # at most this -> medium, else low
