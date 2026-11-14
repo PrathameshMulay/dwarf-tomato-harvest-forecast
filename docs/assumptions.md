@@ -85,3 +85,18 @@ No scripts or files were added under `scripts/outside_data/`, because nothing ou
 - Six rooms, one autumn, one site, one variety; four hand measurements per room.
 - Fruit dry matter (part of the real price) and harvest labour are not in the data.
 - Profit on days other than the actual harvest is a model estimate; each room was harvested once.
+
+## Shipping extension (D14)
+
+| Assumption | Value | Source | If it is wrong |
+|---|---|---|---|
+| Fruit counts as finished growing at | 98% of final fruit weight | Team choice; S-curve fitted on the crop weighings | A higher share moves the earliest pluck day later |
+| Fruit-weight curve steepness | 0.0148 per degree-day (timing refitted daily) | Fitted on all six rooms' weighings this season; in production, the grower's previous crop | A flatter curve finishes growing later |
+| Truck temperature | 13 °C (ripening 3 degree-days/day) | Common practice for partly ripe tomato, 12–15 °C; below ~10 °C causes chilling damage. Not from the dataset | A warmer truck ripens pots on the road: they arrive riper with fewer shelf days |
+| Driving per day | 8 h at 70 km/h, one driver (560 km/day); same day up to 300 km | Team choice | Two drivers halve the days on the road for far destinations |
+| Longest trip for potted plants | 4 days | General guidance: plants yellow and drop fruit in a dark truck after ~3–4 days | Longer trips may lose quality the model does not see |
+| Shop temperature | 20 °C (10 degree-days/day) | Typical retail / home temperature | A warmer shop shortens the days in best condition |
+| Best condition on the shelf | 70–90% of fruit weight red; off the shelf at 94% | Team assumption, general post-harvest practice | Shifts the best-on-shelf dates, sell-by date and ship-by day |
+| Ship-by rule | at least 5 days in best condition after arrival | Team choice | A longer requirement moves the ship-by day earlier |
+| Destinations | Rotterdam 30, Paris 500, Munich 850, Barcelona 1,500, Madrid 1,750 km | Approximate road distances from Bleiswijk (NL), not route-planned | Days on the road can change by one for borderline distances |
+| Ripening after picking | follows the same warmth clock as on the plant | Tomatoes ripen after picking; the clock is fitted on greenhouse data only | Real ripening off the plant may be slower or faster, especially in the cold |

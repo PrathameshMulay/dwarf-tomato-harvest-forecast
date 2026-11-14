@@ -45,6 +45,8 @@ Dates are `"YYYY-MM-DD"` strings. Numbers are plain JSON numbers (no NaN; use `n
 | conf_freshness_days | int | days since newest crop sample or usable photo (larger of the two) |
 | conf_reasons | list[str] | plain-English reasons, 1–3 |
 | conf_day_range_level, conf_agreement_level, conf_freshness_level | str | `high` · `medium` · `low` for each part (added at G2) |
+| weight_complete_day | date\|null | shipping extension (D14): day the fruit reaches 98% of its final weight |
+| k_x1000 | number | shipping extension: steepness of the room's ripening curve per 1,000 degree-days, so the app can plan any trip |
 
 ### `forecast.json` — one row per room × today × day ahead (0–21)
 `room, today, date, pct_red, pct_red_low, pct_red_high, sellable_share, profit_m2_day, profit_low, profit_high, cost_to_date_m2`
@@ -63,6 +65,11 @@ Dates are `"YYYY-MM-DD"` strings. Numbers are plain JSON numbers (no NaN; use `n
 
 ### `backtest.json`
 `rows`: `test, method, value, unit, n, note` (summary). `meta.per_room`: list of `{room, method, predicted, actual, error}`.
+
+### `shipping.json` — one row per room × today × destination (shipping extension, D14)
+Rows only where the pluck day is within the 21-day forecast.
+`room, today, destination (id), pluck_day, pluck_reason (weight|sellable|today), ship_by_day (date|null), pct_at_pluck, pct_on_arrival, sellable_on_arrival (0–1), best_from, best_until, sell_until (int: days after arrival), profit_m2_day, best_profit_day, profit_best_m2_day`
+`meta.destinations` = `[{id, name, distance_km, transit_days}]`; `meta.truck` = the logistics settings used (temperatures, hours, speed, band, end of life, minimum best days, default destination) plus what `app/trip.js` needs to plan a trip in the browser: `base_temp_c`, `pot_spread_sd`, `sellable_red_share`, `earliest_sellable_share`, `pot_z` (the 40 pot quantiles).
 
 ### `assumptions.json`
 `name, value, unit, source, if_wrong` — built from `config/crop.yaml`.

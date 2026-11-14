@@ -24,6 +24,7 @@ import pandas as pd
 from scipy.stats import norm
 
 from harvest.common import PLANTED, Inputs, known_by, load_settings
+from harvest.logistics import ripen
 
 # 40 pots placed at evenly spaced normal quantiles: a smooth, repeatable stand-in for "a room of pots".
 # This is a numerical grid, not a crop setting, so it stays in code.
@@ -116,12 +117,15 @@ def costs_so_far(inputs: Inputs, room: str, today: date, econ: dict) -> dict:
 # ---------------------------------------------------------------- contract functions
 
 def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, params: dict, *,
-                  settings: dict | None = None, extra_cost_m2_day: float = 0.0) -> pd.DataFrame:
+                  settings: dict | None = None, extra_cost_m2_day: float = 0.0,
+                  transit_dd: float = 0.0) -> pd.DataFrame:
     """Expected profit per m² per day if the room were harvested on each forecast date.
 
     `fc` is L01's forecast (date, pct_red, pct_red_low, pct_red_high). `params` is accepted for the
     contract but not needed: the pot spread works from % red alone (see `plant_pct`).
     `extra_cost_m2_day` is added to the cost rate for future days (the temperature what-if).
+    `transit_dd` > 0 judges and pays the pots on arrival: each pot ripens by that many degree-days on
+    the room's curve (steepness params['k']) before the sale rule and price apply (shipping extension).
 
     Adds: sellable_share, profit_m2_day, profit_low, profit_high, cost_to_date_m2 (contract), plus
     revenue_m2 and the early/late scenario columns that `harvest_window` needs.
@@ -144,7 +148,10 @@ def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, para
         row = dict(cost_to_date_m2=cost)
         profits = []
         for scen, col in SCENARIOS.items():
-            pots = plant_pct(getattr(x, col), spread)
+            room_pct = getattr(x, col)
+            if transit_dd > 0:
+                room_pct = ripen(room_pct, params['k'], transit_dd)
+            pots = plant_pct(room_pct, spread)
             sfx = '' if scen == 'mid' else f'_{scen}'
             row['sellable_share' + sfx] = float((pots >= 100 * econ['sellable_red_share']).mean())
             for tag, curve in curves.items():

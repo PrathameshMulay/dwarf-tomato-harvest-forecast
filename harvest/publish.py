@@ -22,6 +22,10 @@ from harvest.evidence import evidence_rows
 from harvest.alerts import alerts
 from harvest.backtest import timing_test
 from harvest.forecast import fit_params, forecast
+from harvest.growth import weight_complete_day
+from harvest.shipping import ship_plan
+from harvest.logistics import transit_days
+from harvest.economics import Z
 from harvest.whatif import heating_cost_per_degree, whatif
 
 OUT = REPO / 'app' / 'data'
@@ -58,8 +62,24 @@ def status_for(today: date, win: dict, sellable_now: float, conf: dict, settings
     return 'keep_growing'
 
 
-def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict) -> tuple[dict, list[dict], list[dict]]:
-    """One decision card, its 22-day forecast rows and its what-if rows, all from one fit."""
+def compact_ship(room: str, today: date, r: dict) -> dict | None:
+    """shipping.json row (contract §1): shelf dates as days after arrival, distance and days on the road in
+    meta.destinations, and no row when the pluck day is beyond the forecast (keeps app/data under 5 MB)."""
+    if r['pluck_day'] is None:
+        return None
+    after = lambda d: (d - r['arrival_day']).days
+    return dict(room=room, today=today, destination=r['destination'], pluck_day=r['pluck_day'],
+                pluck_reason=r['pluck_reason'], ship_by_day=r['ship_by_day'],
+                pct_at_pluck=round(r['pct_at_pluck'], 1), pct_on_arrival=round(r['pct_on_arrival'], 1),
+                sellable_on_arrival=round(r['sellable_share_on_arrival'], 2), best_from=after(r['best_from']),
+                best_until=after(r['best_until']), sell_until=after(r['sell_until']),
+                profit_m2_day=round(r['profit_m2_day'], 3), best_profit_day=r['best_profit_day'],
+                profit_best_m2_day=round(r['profit_best_m2_day'], 3))
+
+
+def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict
+             ) -> tuple[dict, list[dict], list[dict], list[dict]]:
+    """One decision card, its 22-day forecast rows, what-if rows and shipping rows, all from one fit."""
     horizon = int(settings['ripeness']['horizon_days'])
     p = fit_params(inputs, room, today, settings)
     fc = forecast(inputs, room, today, horizon=horizon, settings=settings, params=p)
@@ -80,6 +100,12 @@ def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict)
                 conf_freshness_days=int(conf['freshness_days']), conf_reasons=conf['reasons'],
                 conf_day_range_level=levels.get('day_range'), conf_agreement_level=levels.get('agreement'),
                 conf_freshness_level=levels.get('freshness'))
+    weight = weight_complete_day(inputs, room, today, p['gdd_today'], p['gdd_rate'], settings)
+    card['weight_complete_day'] = weight['day']   # shipping extension: fruit stops gaining weight
+    card['k_x1000'] = p['k'] * 1000               # curve steepness per 1000 dd (keeps precision after 4-dp rounding) for app/trip.js
+    ships = [compact_ship(room, today, ship_plan(inputs, room, today, settings, p, fc, dest, weight))
+             for dest in settings['logistics']['destinations']]
+    ships = [r for r in ships if r is not None]
     rows = [dict(room=room, today=today, date=r.date, pct_red=r.pct_red, pct_red_low=r.pct_red_low,
                  pct_red_high=r.pct_red_high, sellable_share=r.sellable_share, profit_m2_day=r.profit_m2_day,
                  profit_low=r.profit_low, profit_high=r.profit_high, cost_to_date_m2=r.cost_to_date_m2)
@@ -89,7 +115,7 @@ def room_day(inputs: Inputs, room: str, today: date, settings: dict, heat: dict)
                                                                         settings=settings, params=p)
     wi = [dict(room=room, today=today, **whatif(inputs, room, today, d, forecast_fn=fc_fn, params_fn=fixed,
                                                   settings=settings, heat=heat)) for d in DELTAS]
-    return card, rows, wi
+    return card, rows, wi, ships
 
 
 def customers_and_rooms(inputs: Inputs) -> tuple[list[dict], list[dict]]:
@@ -128,11 +154,11 @@ def main() -> int:
     as_of = (todays[0], todays[-1])
     heat_by_day = {t: heating_cost_per_degree(inputs, t) for t in todays}
 
-    cards, fc_rows, wi_rows = [], [], []
+    cards, fc_rows, wi_rows, ship_rows = [], [], [], []
     for room in ROOMS:
         for t in today_range(inputs, room):
-            c, f, w = room_day(inputs, room, t, settings, heat_by_day[t])
-            cards.append(c); fc_rows += f; wi_rows += w
+            c, f, w, sh = room_day(inputs, room, t, settings, heat_by_day[t])
+            cards.append(c); fc_rows += f; wi_rows += w; ship_rows += sh
     summary, per_room = timing_test(inputs, settings)
 
     write('customers', customers, as_of)
@@ -145,6 +171,18 @@ def main() -> int:
     write('alerts', alerts(inputs, settings), as_of)
     write('backtest', summary.to_dict('records'), as_of, per_room=per_room)
     write('assumptions', assumptions_rows(settings), as_of)
+    lg = settings['logistics']
+    dests = [dict(id=d['id'], name=d['name'], distance_km=d['distance_km'], transit_days=transit_days(d['distance_km'], lg))
+             for d in lg['destinations']]
+    write('shipping', ship_rows, as_of, destinations=dests, truck=dict(
+        temp_c=lg['transit_temp_c'], driving_hours_per_day=lg['driving_hours_per_day'], avg_speed_kmh=lg['avg_speed_kmh'],
+        same_day_km=lg['same_day_km'], max_transit_days=lg['max_transit_days'], shop_temp_c=lg['shop_temp_c'],
+        best_band_pct_red=lg['best_band_pct_red'], end_of_life_pct_red=lg['end_of_life_pct_red'],
+        min_best_shelf_days=lg['min_best_shelf_days'], default_destination=lg['default_destination'],
+        base_temp_c=settings['base_temp_c'], pot_spread_sd=settings['ripeness']['plant_spread_sd'],
+        sellable_red_share=settings['economics']['sellable_red_share'],
+        earliest_sellable_share=settings['economics']['earliest_sellable_share'],
+        pot_z=[round(float(z), 5) for z in Z]))
     size = sum(p.stat().st_size for p in OUT.rglob('*') if p.is_file()) / 1e6
     print(f'publish: {len(cards)} decision cards, {len(fc_rows)} forecast rows, {len(wi_rows)} what-if rows; '
           f'app/data is {size:.1f} MB')

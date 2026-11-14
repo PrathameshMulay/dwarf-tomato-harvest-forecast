@@ -8,6 +8,12 @@
   'use strict';
 
   const FILES = ['customers', 'rooms', 'days', 'forecast', 'whatif', 'evidence', 'alerts', 'backtest', 'assumptions'];
+  const OPTIONAL = ['shipping'];          // shipping extension; mock/ has none, so the section hides
+  const PLUCK_WHY = {
+    weight: 'the fruit is estimated to stop gaining weight on this day, so picking from then on costs no weight; it only turns red after that',
+    sellable: 'it is the first day enough pots are ready to sell when they arrive (the fruit had already stopped growing)',
+    today: 'both conditions are already met: the fruit has stopped growing and enough pots sell on arrival',
+  };
   const DEFAULT_TODAY = '2024-11-06';     // SPEC D3: replay "today" defaults to 6 Nov 2024
   const ALERT_DAYS = 7;                   // an alert counts as "recent" for this many days (display rule)
   const STATUS = {
@@ -28,7 +34,8 @@
     'warmth+camera+sample': 'Warmth + photos + the latest crop sample',
   };
 
-  const S = { data: null, base: 'data/', mock: false, customer: null, today: DEFAULT_TODAY, view: 'home', room: null, delta: 0 };
+  const S = { data: null, base: 'data/', mock: false, customer: null, today: DEFAULT_TODAY, view: 'home', room: null, delta: 0, dest: null,
+    chat: { key: null, turns: [], plan: null, busy: false, ctl: null } };
   const idx = {};
   const $ = (sel, el = document) => el.querySelector(sel);
   const main = $('#main');
@@ -76,6 +83,9 @@
     const docs = await Promise.all(FILES.map((f) => fetchJSON(base + f + '.json')));
     const out = {};
     FILES.forEach((f, i) => (out[f] = docs[i]));
+    for (const f of OPTIONAL) {
+      try { out[f] = await fetchJSON(base + f + '.json'); } catch (e) { out[f] = { meta: {}, rows: [] }; }
+    }
     return out;
   }
   async function load() {
@@ -110,6 +120,10 @@
     idx.evidence = new Map(D.evidence.rows.map((r) => [r.room + '|' + r.date, r]));
     idx.evidenceByRoom = groupBy(D.evidence.rows, (r) => r.room);
     idx.alerts = D.alerts.rows.slice().sort((a, b) => d3.descending(a.date, b.date));
+    idx.ship = new Map(D.shipping.rows.map((r) => [r.room + '|' + r.today + '|' + r.destination, r]));
+    idx.dests = D.shipping.meta.destinations || [];
+    idx.truck = D.shipping.meta.truck || {};
+    if (!S.dest) S.dest = idx.truck.default_destination || (idx.dests[0] || {}).id;
     const todays = D.days.rows.map((r) => r.today);
     idx.minToday = d3.min(todays);
     idx.maxToday = d3.max(todays);
@@ -340,6 +354,40 @@
           ${evidenceBlock(ev, d)}
         </section>
       </div>
+      ${idx.dests.length ? `<section class="card section" id="ship">
+        <h2>When to pluck for shipping</h2>
+        <p class="muted small">Pick where the pots go. The pluck day is the earliest day the fruit has stopped gaining weight and enough pots are ready to sell when they arrive; picking later only uses up shelf life.</p>
+        <div class="whatif-ctl">
+          <label for="dest" class="ctl-label">Destination</label>
+          <select id="dest">${idx.dests.map((x) => `<option value="${esc(x.id)}"${x.id === S.dest ? ' selected' : ''}>${esc(x.name)} · ${Number(x.distance_km).toLocaleString('en')} km · ${x.transit_days ? plural(x.transit_days, 'day') + ' by truck' : 'same day'}</option>`).join('')}</select>
+        </div>
+        <div id="ship-out" aria-live="polite"></div>
+        <h3>All destinations</h3>
+        <div id="ship-table"></div>
+        <p class="caption">${shipCaption()}</p>
+        <h3>Plan your own trip</h3>
+        <form id="trip-form" class="trip-form">
+          <label>Where to<input name="name" maxlength="60" value="My buyer"></label>
+          <label>Road distance (km)<input name="distance_km" type="number" min="0" max="5000" step="10" value="1200" required></label>
+          <label>Drivers<select name="drivers"><option value="1">1 (8 h a day)</option><option value="2">2 (16 h a day)</option></select></label>
+          <label>Truck temperature (°C)<input name="transit_temp_c" type="number" min="0" max="30" step="0.5" value="${idx.truck.temp_c}" required></label>
+          <label>Shop temperature (°C)<input name="shop_temp_c" type="number" min="5" max="35" step="0.5" value="${idx.truck.shop_temp_c}" required></label>
+          <label>Best days wanted on the shelf<input name="min_best_shelf_days" type="number" min="1" max="14" step="1" value="${idx.truck.min_best_shelf_days}" required></label>
+          <button class="btn" type="submit">Work out the pluck day</button>
+        </form>
+        <div id="trip-out" aria-live="polite"></div>
+        <h3>Ask the shipping assistant</h3>
+        <p class="muted small">Tell it where the pots go and how they travel; it asks what it needs, then works out the pluck day with the same model. Answers are AI-written estimates and use your own Claude allowance.</p>
+        <div class="chat">
+          <div class="chat-log" id="chat-log" aria-live="polite"></div>
+          <form id="chat-form" class="chat-form">
+            <label class="sr-only" for="chat-input">Message to the shipping assistant</label>
+            <textarea id="chat-input" rows="2" maxlength="1000" placeholder="e.g. 3,000 pots to a garden centre near Vienna by refrigerated truck; the buyer checks them on arrival"></textarea>
+            <div class="chat-btns"><button class="btn" type="submit" id="chat-send">Send</button><button class="btn ghost" type="button" id="chat-stop" hidden>Stop</button><button class="btn ghost" type="button" id="chat-reset">New chat</button></div>
+          </form>
+          <p class="note" id="chat-note"></p>
+        </div>
+      </section>` : ''}
       <section class="card section" id="whatif">
         <h2>What if the room ran warmer or cooler?</h2>
         <p class="muted small">Change the room's average temperature from today on. Warmer rooms ripen faster but use more heating.</p>
@@ -360,7 +408,200 @@
       drawProfit($('#chart-profit'), fc, d, meta);
     });
     updateWhatif(d, area);
+    if (idx.dests.length) {
+      const sel = $('#dest');
+      sel.addEventListener('change', () => { S.dest = sel.value; updateShip(d); });
+      updateShip(d);
+      setupTrip(d, fc);
+      setupChat(d, fc);
+    }
   }
+  function shipCaption() {
+    const t = idx.truck;
+    return `Model estimate. Refrigerated truck at ${t.temp_c} °C, one driver ${t.driving_hours_per_day} h a day at ${t.avg_speed_kmh} km/h (same day up to ${t.same_day_km} km); shop ${t.shop_temp_c} °C. Best condition = ${t.best_band_pct_red[0]}–${t.best_band_pct_red[1]}% of fruit weight red; off the shelf at ${t.end_of_life_pct_red}%. Pots are judged when they arrive. Distances are approximate road distances from the greenhouse (Bleiswijk, NL). Source: shipping.json, days.json; assumptions on "How it works".`;
+  }
+  function shipLine(r, dest) {
+    const arrive = addDays(r.pluck_day, dest.transit_days);
+    return { arrive, from: addDays(arrive, r.best_from), until: addDays(arrive, r.best_until), sell: addDays(arrive, r.sell_until) };
+  }
+  function updateShip(d) {
+    const dest = idx.dests.find((x) => x.id === S.dest) || idx.dests[0];
+    const r = idx.ship.get(S.room + '|' + S.today + '|' + dest.id);
+    const out = $('#ship-out');
+    if (!r) {
+      out.innerHTML = `<p class="finding">No pluck day within the 21-day forecast yet.</p><p class="muted small">The fruit is estimated to stop gaining weight on ${day(d.weight_complete_day)}. Check again closer to that day.</p>`;
+    } else {
+      const L = shipLine(r, dest);
+      const late = r.ship_by_day && r.pluck_day > r.ship_by_day;
+      const tooLong = dest.transit_days > idx.truck.max_transit_days;
+      const gap = r.profit_m2_day - r.profit_best_m2_day;
+      out.innerHTML = `
+        <p class="finding">Pluck on ${day(r.pluck_day)} (${rel(S.today, r.pluck_day)}): ${esc(PLUCK_WHY[r.pluck_reason])}.</p>
+        <div class="wi-out">
+          <div class="part"><div class="part-k">Fruit stops growing</div><div class="part-v">${short(d.weight_complete_day)}</div><div class="part-s">98% of final fruit weight (estimate)</div></div>
+          <div class="part"><div class="part-k">Pluck day</div><div class="part-v">${short(r.pluck_day)}</div><div class="part-s">fruit ${pct(r.pct_at_pluck)} red when picked</div></div>
+          <div class="part"><div class="part-k">Arrives in ${esc(dest.name)}</div><div class="part-v">${short(L.arrive)}</div><div class="part-s">${pct(r.pct_on_arrival)} red · ${share(r.sellable_on_arrival)} of pots ready to sell</div></div>
+          <div class="part"><div class="part-k">Best on the shelf</div><div class="part-v">${span2(L.from, L.until)}</div><div class="part-s">${plural(r.best_until - r.best_from + 1, 'day')} · sell by ${short(L.sell)}</div></div>
+          <div class="part"><div class="part-k">Profit at pluck day</div><div class="part-v">${euro(r.profit_m2_day, 3)}</div><div class="part-s">per m² per day; best-profit day ${short(r.best_profit_day)} gives ${euro(r.profit_best_m2_day, 3)} (${signedEuro(gap, 3)})</div></div>
+        </div>
+        ${late ? `<p class="note">Plucking this late leaves fewer than ${idx.truck.min_best_shelf_days} days in best condition: the last day that still does is ${day(r.ship_by_day)}.</p>` : `<p class="note">Latest pluck day that still leaves ${idx.truck.min_best_shelf_days}+ days in best condition: ${day(r.ship_by_day)}.</p>`}
+        ${tooLong ? `<p class="note">${plural(dest.transit_days, 'day')} on the road is more than ${idx.truck.max_transit_days}: potted plants may yellow and drop fruit in a dark truck.</p>` : ''}`;
+    }
+    const rows = idx.dests.map((x) => [x, idx.ship.get(S.room + '|' + S.today + '|' + x.id)]);
+    $('#ship-table').innerHTML = `<div class="table-wrap"><table class="nums"><thead><tr><th>Destination</th><th class="r">Truck</th><th>Pluck</th><th>Arrives</th><th class="r">Red on arrival</th><th>Best on shelf</th><th>Sell by</th></tr></thead><tbody>
+      ${rows.map(([x, r]) => {
+        if (!r) return `<tr><td>${esc(x.name)}</td><td class="r">${x.transit_days ? plural(x.transit_days, 'day') : 'same day'}</td><td colspan="5" class="muted">beyond the forecast</td></tr>`;
+        const L = shipLine(r, x);
+        return `<tr${x.id === S.dest ? ' class="win"' : ''}><td>${esc(x.name)}</td><td class="r">${x.transit_days ? plural(x.transit_days, 'day') : 'same day'}</td><td>${short(r.pluck_day)}</td><td>${short(L.arrive)}</td><td class="r">${pct(r.pct_on_arrival)}</td><td>${span2(L.from, L.until)}</td><td>${short(L.sell)}</td></tr>`;
+      }).join('')}</tbody></table></div>`;
+  }
+  /* ---------- custom trip and shipping assistant (shipping extension) ---------- */
+  function tripHTML(plan, label) {
+    if (!plan.pluck_day) {
+      return `<p class="finding">${esc(label)}: no pluck day within the 21-day forecast yet (fruit estimated to stop growing ${day(plan.weight_complete_day)}).</p>`;
+    }
+    const warn = [];
+    if (plan.chilling_risk) warn.push(`A truck below 10 °C risks chilling damage (poor colour, soft spots).`);
+    if (plan.too_long) warn.push(`${plural(plan.transit_days, 'day')} on the road is more than ${idx.truck.max_transit_days}: potted plants may yellow and drop fruit in a dark truck.`);
+    if (plan.late) warn.push(`Plucking this late leaves fewer than ${plan.min_best_shelf_days} best days on the shelf.`);
+    return `<p class="finding">${esc(label)}: pluck on ${day(plan.pluck_day)} (${rel(S.today, plan.pluck_day)}), ${esc(PLUCK_WHY[plan.pluck_reason])}.</p>
+      <div class="wi-out">
+        <div class="part"><div class="part-k">On the road</div><div class="part-v">${plan.transit_days ? plural(plan.transit_days, 'day') : 'same day'}</div><div class="part-s">truck ${plan.transit_temp_c} °C</div></div>
+        <div class="part"><div class="part-k">Arrives</div><div class="part-v">${short(plan.arrival_day)}</div><div class="part-s">${pct(plan.pct_on_arrival)} red · ${share(plan.sellable_on_arrival)} of pots ready to sell</div></div>
+        <div class="part"><div class="part-k">Best on the shelf</div><div class="part-v">${plan.best_shelf_days ? span2(plan.best_from, plan.best_until) : '—'}</div><div class="part-s">${plan.best_shelf_days ? plural(plan.best_shelf_days, 'day') + ' · ' : ''}sell by ${short(plan.sell_until)}</div></div>
+        <div class="part"><div class="part-k">Latest pluck day</div><div class="part-v">${short(plan.ship_by_day)}</div><div class="part-s">still ${plan.min_best_shelf_days}+ best days</div></div>
+      </div>${warn.map((w) => `<p class="note">${esc(w)}</p>`).join('')}`;
+  }
+  function setupTrip(d, fc) {
+    const form = $('#trip-form');
+    const run = () => {
+      if (!form.checkValidity()) { $('#trip-out').innerHTML = '<p class="muted small">Check the highlighted values.</p>'; return; }
+      const f = new FormData(form);
+      const plan = Trip.planTrip(fc, d, idx.truck, { distance_km: +f.get('distance_km'), drivers: +f.get('drivers'),
+        transit_temp_c: +f.get('transit_temp_c'), shop_temp_c: +f.get('shop_temp_c'), min_best_shelf_days: +f.get('min_best_shelf_days') });
+      $('#trip-out').innerHTML = tripHTML(plan, String(f.get('name') || 'Your trip') + ` (${(+f.get('distance_km')).toLocaleString('en')} km)`);
+    };
+    form.addEventListener('submit', (e) => { e.preventDefault(); run(); });
+    if (S.chat.plan && S.chat.key === S.room + '|' + S.today) $('#trip-out').innerHTML = tripHTML(S.chat.plan.plan, S.chat.plan.label);
+  }
+
+  let samplePromise = null;
+  const getSample = () => (samplePromise ||= (window.claude && window.claude.use ? window.claude.use('sample') : Promise.resolve(null)));
+  const CHAT_ERR = {
+    not_granted: 'The assistant needs your permission to use Claude in this app. It stays off for this visit.',
+    sampling_disabled: 'Claude is not available for this account.', tools_unavailable: 'This view cannot run the assistant’s calculator.',
+    rate_limited: 'Too many requests just now. Try again in a minute.', session_expired: 'Please sign in to Claude again.',
+    refused: 'The assistant could not answer that. Try rephrasing.', empty_completion: 'No answer came back. Try a shorter question.',
+  };
+  function chatRules(d) {
+    return `You are the shipping assistant inside "Harvest Window", a greenhouse app for dwarf tomatoes sold as whole potted plants.
+The grower is deciding where these pots go, how they travel, and therefore when to pluck (harvest) them.
+Greenhouse location: Bleiswijk, the Netherlands. Room: ${roomName(S.room)}. Today (replayed data): ${S.today}.
+Rules:
+- Call get_room_context first if you need the room's ripeness or the preset destinations.
+- Before giving any date, call plan_trip. Never invent dates, percentages or shelf days: quote the tool's numbers.
+- If the grower has not said where the pots go or how they travel, ask (at most two short questions). Useful facts: destination, transport (refrigerated truck, normal truck, sea container, air), truck temperature, one or two drivers, whether the buyer checks the pots on arrival, how many best days on the shelf they need.
+- For a named place, estimate the road distance from Bleiswijk and say it is approximate. For sea or air, set transit_days yourself and state the assumption. A normal unrefrigerated truck runs at about 18 °C.
+- Compare a few options with plan_trip when the grower is choosing between destinations or transport.
+- Mention warnings the tool returns (chilling below 10 °C, more than ${idx.truck.max_transit_days} days in a truck, plucking after the latest day).
+- Plain words for a busy grower, under 120 words, dates like "Tue 12 Nov". Say "estimated"; these are model estimates on replayed 2024 data.`;
+  }
+  function chatTools(d, fc) {
+    const summary = (p) => p.pluck_day ? { pluck_day: p.pluck_day, pluck_reason: p.pluck_reason, days_on_road: p.transit_days,
+      truck_temp_c: p.transit_temp_c, arrival_day: p.arrival_day, red_on_arrival_pct: Math.round(p.pct_on_arrival),
+      pots_ready_on_arrival_pct: Math.round(p.sellable_on_arrival * 100), best_on_shelf: [p.best_from, p.best_until],
+      best_days_on_shelf: p.best_shelf_days, sell_by: p.sell_until, latest_pluck_day_for_wanted_shelf_days: p.ship_by_day,
+      fruit_stops_growing: p.weight_complete_day, warnings: { chilling_risk: p.chilling_risk, too_long_for_potted_plants: p.too_long, late: p.late } }
+      : { pluck_day: null, note: 'No pluck day within the 21-day forecast', fruit_stops_growing: p.weight_complete_day };
+    return [
+      { name: 'get_room_context', description: 'Returns the room’s state today (ripeness, fruit stops growing, best-profit day) and the pluck plan for each preset destination with the default truck. No arguments.',
+        execute: () => ({ room: roomName(S.room), today: S.today, red_today_pct: Math.round(d.pct_red_now), pots_ready_today_pct: Math.round(d.sellable_share_now * 100),
+          fruit_stops_growing: d.weight_complete_day, best_profit_day_local: d.best_day, default_truck: { temp_c: idx.truck.temp_c, hours_per_day: idx.truck.driving_hours_per_day, speed_kmh: idx.truck.avg_speed_kmh },
+          shop_temp_c: idx.truck.shop_temp_c, best_condition_red_pct: idx.truck.best_band_pct_red,
+          presets: idx.dests.map((x) => ({ name: x.name, distance_km: x.distance_km, ...summary(Trip.planTrip(fc, d, idx.truck, { distance_km: x.distance_km })) })) }) },
+      { name: 'plan_trip', description: 'Works out the pluck day for one trip with the app’s model and shows it on the page. Give distance_km (road distance from Bleiswijk) or transit_days. Returns pluck day, arrival day, ripeness and pots ready on arrival, best days on the shelf, sell-by and warnings.',
+        inputSchema: { type: 'object', properties: {
+          destination_name: { type: 'string' }, distance_km: { type: 'number' }, transit_days: { type: 'number', description: 'Use for sea or air, or when the grower states it' },
+          transit_temp_c: { type: 'number', description: 'Default 13 (refrigerated truck)' }, drivers: { type: 'number', description: '1 or 2' },
+          shop_temp_c: { type: 'number' }, min_best_shelf_days: { type: 'number' } }, required: ['destination_name'] },
+        execute: (input) => {
+          const trip = {};
+          for (const k of ['distance_km', 'transit_days', 'transit_temp_c', 'drivers', 'shop_temp_c', 'min_best_shelf_days']) {
+            if (input[k] != null && input[k] !== '' && Number.isFinite(Number(input[k]))) trip[k] = Number(input[k]);
+          }
+          if (trip.distance_km == null && trip.transit_days == null) throw new Error('Give distance_km or transit_days.');
+          const plan = Trip.planTrip(fc, d, idx.truck, trip);
+          const label = String(input.destination_name || 'Trip').slice(0, 60) + ' (assistant)';
+          S.chat.plan = { plan, label };
+          const out = $('#trip-out');
+          if (out) out.innerHTML = tripHTML(plan, label);
+          return summary(plan);
+        } },
+    ];
+  }
+  function renderChatLog() {
+    const log = $('#chat-log');
+    if (!log) return;
+    log.innerHTML = '';
+    if (!S.chat.turns.length) {
+      const p = document.createElement('p');
+      p.className = 'chat-empty';
+      p.textContent = 'Where are these pots going, and how will they travel?';
+      log.append(p);
+    }
+    for (const t of S.chat.turns) {
+      const b = document.createElement('div');
+      b.className = 'bubble ' + (t.role === 'user' ? 'me' : 'ai');
+      b.textContent = t.content;
+      log.append(b);
+    }
+    log.scrollTop = log.scrollHeight;
+  }
+  async function setupChat(d, fc) {
+    const key = S.room + '|' + S.today;
+    if (S.chat.key !== key) { if (S.chat.ctl) S.chat.ctl.abort(); S.chat = { key, turns: [], plan: null, busy: false, ctl: null }; }
+    renderChatLog();
+    const form = $('#chat-form'), input = $('#chat-input'), send = $('#chat-send'), stop = $('#chat-stop'), note = $('#chat-note');
+    const off = (msg) => { input.disabled = true; send.disabled = true; note.textContent = msg; };
+    $('#chat-reset').addEventListener('click', () => { if (S.chat.ctl) S.chat.ctl.abort(); S.chat.turns = []; S.chat.plan = null; renderChatLog(); $('#trip-out').innerHTML = ''; });
+    stop.addEventListener('click', () => S.chat.ctl && S.chat.ctl.abort());
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+    const sample = await getSample().catch(() => null);
+    if (!$('#chat-form') || S.chat.key !== key) return;            // screen changed while waiting
+    if (!sample) { off('The assistant works when Harvest Window is opened as a Claude artifact. Use "Plan your own trip" above meanwhile.'); return; }
+    const caps = await sample.limits().catch(() => null);
+    if (!caps || !caps.tools) { off('This view cannot run the assistant’s calculator. Use "Plan your own trip" above.'); return; }
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text || S.chat.busy) return;
+      input.value = '';
+      S.chat.turns.push({ role: 'user', content: text });
+      S.chat.turns = S.chat.turns.slice(-12);
+      renderChatLog();
+      const log = $('#chat-log');
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble ai pending';
+      bubble.textContent = 'Thinking…';
+      log.append(bubble); log.scrollTop = log.scrollHeight;
+      S.chat.busy = true; send.disabled = true; stop.hidden = false; note.textContent = '';
+      const ctl = new AbortController(); S.chat.ctl = ctl;
+      try {
+        const { text: answer } = await sample([{ role: 'user', content: chatRules(d) }, ...S.chat.turns], {
+          tools: chatTools(d, fc), modelTier: 'quick', signal: ctl.signal,
+          onText: ({ text: t }) => { bubble.classList.remove('pending'); bubble.textContent = t; log.scrollTop = log.scrollHeight; } });
+        S.chat.turns.push({ role: 'assistant', content: answer });
+      } catch (err) {
+        if (err && err.text) S.chat.turns.push({ role: 'assistant', content: err.text + ' [interrupted]' });
+        if (err && err.code !== 'cancelled') note.textContent = CHAT_ERR[err.code] || 'The assistant is unavailable right now. Try again shortly.';
+        if (err && ['not_granted', 'sampling_disabled', 'tools_unavailable', 'not_declared', 'capability_disabled', 'capability_removed'].includes(err.code)) off(note.textContent);
+      } finally {
+        S.chat.busy = false; S.chat.ctl = null;
+        if ($('#chat-send') === send) { send.disabled = input.disabled; stop.hidden = true; renderChatLog(); }
+      }
+    });
+  }
+
   function profitFinding(d) {
     const tail = d.losses_start_day ? ` From ${day(d.losses_start_day)} each extra day costs more than it earns.` : '';
     return `Profit per m² per day peaks on ${day(d.best_day)} at an estimated ${euro(d.profit_best_m2_day)} (today: ${euro(d.profit_today_m2_day)}).${tail}`;

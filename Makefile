@@ -2,7 +2,7 @@
 PY ?= .venv/bin/python
 export HARVEST_INPUTS ?= $(abspath out)
 
-.PHONY: setup test build app
+.PHONY: setup test build app artifact
 
 setup:
 	python3 -m venv .venv
@@ -12,6 +12,7 @@ test:
 	"$(PY)" -m pytest -q
 	"$(PY)" contracts/check.py
 	"$(PY)" app/check_app.py
+	node tests/test_trip.cjs
 
 build:
 	"$(PY)" scripts/select_photos.py
@@ -21,3 +22,6 @@ build:
 
 app:
 	"$(PY)" -m http.server 8766 --directory app
+
+artifact:
+	"$(PY)" scripts/artifact_page.py

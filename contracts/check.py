@@ -16,7 +16,7 @@ FIELDS = {
     'days': ['room', 'today', 'status', 'pct_red_now', 'pct_red_low', 'pct_red_high', 'sellable_share_now', 'model',
              'earliest_sellable_day', 'best_day', 'losses_start_day', 'best_day_low', 'best_day_high',
              'profit_best_m2_day', 'profit_today_m2_day', 'confidence', 'conf_day_range_days', 'conf_agreement',
-             'conf_freshness_days', 'conf_reasons'],
+             'conf_freshness_days', 'conf_reasons', 'weight_complete_day', 'k_x1000'],
     'forecast': ['room', 'today', 'date', 'pct_red', 'pct_red_low', 'pct_red_high', 'sellable_share', 'profit_m2_day',
                  'profit_low', 'profit_high', 'cost_to_date_m2'],
     'whatif': ['room', 'today', 'delta_c', 'best_day', 'days_change', 'profit_best_m2_day', 'profit_change_m2_day',
@@ -26,6 +26,9 @@ FIELDS = {
     'alerts': ['room', 'date', 'kind', 'severity', 'title', 'message', 'numbers'],
     'backtest': ['test', 'method', 'value', 'unit', 'n', 'note'],
     'assumptions': ['name', 'value', 'unit', 'source', 'if_wrong'],
+    'shipping': ['room', 'today', 'destination', 'pluck_day', 'pluck_reason', 'ship_by_day', 'pct_at_pluck',
+                 'pct_on_arrival', 'sellable_on_arrival', 'best_from', 'best_until', 'sell_until', 'profit_m2_day',
+                 'best_profit_day', 'profit_best_m2_day'],
 }
 ENUMS = {
     ('days', 'status'): {'harvest_now', 'plan_harvest', 'keep_growing', 'check_crop'},
@@ -34,6 +37,7 @@ ENUMS = {
     ('days', 'model'): {'warmth', 'warmth+sample', 'warmth+camera', 'warmth+camera+sample'},
     ('alerts', 'kind'): {'behind_schedule', 'ahead_of_schedule', 'sensor_check', 'room_drift'},
     ('alerts', 'severity'): {'info', 'warning'},
+    ('shipping', 'pluck_reason'): {'weight', 'sellable', 'today'},
 }
 
 

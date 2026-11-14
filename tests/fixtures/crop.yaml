@@ -38,3 +38,28 @@ alerts:
   schedule_points: 15        # sample or camera outside the band by more than this -> behind/ahead
   flatline_days: 3
   drift_share: 0.15          # 7-day warmth rate this far below the other rooms' median -> drift
+
+growth:                      # Shipping extension: when fruit stops gaining weight (harvest/growth.py)
+  complete_share: 0.98       # Team choice: fruit counts as "finished growing" at 98% of its final weight
+  prior_steepness: 0.0148    # Data: fruit-weight S-curve steepness per degree-day, fitted on all six rooms' weighings (full season). In production: the grower's previous crop
+  prior_half_gdd: 474.0      # Data: degree-days at half the final fruit weight, same fit; used only before 3 weighings exist
+  min_rooms: 3               # Team choice: fit the timing on today's weighings once this many other rooms have 3+
+
+logistics:                   # Shipping extension: truck, distance and shelf (harvest/logistics.py, harvest/shipping.py)
+  transit_temp_c: 13.0       # Common practice for partly ripe tomato: 12-15 °C; below ~10 °C causes chilling damage. Not from the dataset
+  shop_temp_c: 20.0          # Typical retail / home room temperature. Not from the dataset
+  driving_hours_per_day: 8   # Team choice (one driver, 8 h at the wheel)
+  avg_speed_kmh: 70          # Loaded truck incl. traffic and stops (EU trucks are limited to 90 km/h)
+  same_day_km: 300           # Up to this distance the pots arrive the same day
+  max_transit_days: 4        # Potted plants yellow and drop fruit after ~3-4 days in a dark truck. General guidance
+  best_band_pct_red: [70, 90]   # Team assumption: pots look their best from 70 % to 90 % of fruit weight red
+  end_of_life_pct_red: 94    # Team assumption: off the shelf once 94 % red (soft, cracking, fruit drop)
+  min_best_shelf_days: 5     # Team choice: ship-by day leaves at least this many days in best condition
+  default_destination: munich
+  destinations:              # Approximate road distances from Bleiswijk (NL); not route-planned
+    - {id: local, name: Local market (Rotterdam), distance_km: 30}
+    - {id: paris, name: Paris, distance_km: 500}
+    - {id: munich, name: Munich, distance_km: 850}
+    - {id: barcelona, name: Barcelona, distance_km: 1500}
+    - {id: madrid, name: Madrid, distance_km: 1750}
+

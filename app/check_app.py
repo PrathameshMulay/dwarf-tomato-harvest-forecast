@@ -21,7 +21,7 @@ READS = {   # file -> row fields app.js reads
     'days': ['room', 'today', 'status', 'pct_red_now', 'pct_red_low', 'pct_red_high', 'sellable_share_now', 'model',
              'earliest_sellable_day', 'best_day', 'losses_start_day', 'best_day_low', 'best_day_high',
              'profit_best_m2_day', 'profit_today_m2_day', 'confidence', 'conf_day_range_days', 'conf_agreement',
-             'conf_freshness_days', 'conf_reasons'],
+             'conf_freshness_days', 'conf_reasons', 'weight_complete_day', 'k_x1000'],
     'forecast': ['room', 'today', 'date', 'pct_red', 'pct_red_low', 'pct_red_high', 'sellable_share', 'profit_m2_day',
                  'profit_low', 'profit_high', 'cost_to_date_m2'],
     'whatif': ['room', 'today', 'delta_c', 'best_day', 'days_change', 'profit_best_m2_day', 'profit_change_m2_day',

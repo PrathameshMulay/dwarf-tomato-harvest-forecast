@@ -48,6 +48,30 @@ economics:
   harvest_now_share: 0.90         # PROPOSED: status harvest_now needs at least this share sellable today
   area_m2: 96.0                   # Paper §2.2: six equal compartments of 96 m2. VERIFIED
 
+growth:                      # Shipping extension: when fruit stops gaining weight (harvest/growth.py)
+  complete_share: 0.98       # Team choice: fruit counts as "finished growing" at 98% of its final weight
+  prior_steepness: 0.0148    # Data: fruit-weight S-curve steepness per degree-day, fitted on all six rooms' weighings (full season). In production: the grower's previous crop
+  prior_half_gdd: 474.0      # Data: degree-days at half the final fruit weight, same fit; used only before 3 weighings exist
+  min_rooms: 3               # Team choice: fit the timing on today's weighings once this many other rooms have 3+
+
+logistics:                   # Shipping extension: truck, distance and shelf (harvest/logistics.py, harvest/shipping.py)
+  transit_temp_c: 13.0       # Common practice for partly ripe tomato: 12-15 °C; below ~10 °C causes chilling damage. Not from the dataset
+  shop_temp_c: 20.0          # Typical retail / home room temperature. Not from the dataset
+  driving_hours_per_day: 8   # Team choice (one driver, 8 h at the wheel)
+  avg_speed_kmh: 70          # Loaded truck incl. traffic and stops (EU trucks are limited to 90 km/h)
+  same_day_km: 300           # Up to this distance the pots arrive the same day
+  max_transit_days: 4        # Potted plants yellow and drop fruit after ~3-4 days in a dark truck. General guidance
+  best_band_pct_red: [70, 90]   # Team assumption: pots look their best from 70 % to 90 % of fruit weight red
+  end_of_life_pct_red: 94    # Team assumption: off the shelf once 94 % red (soft, cracking, fruit drop)
+  min_best_shelf_days: 5     # Team choice: ship-by day leaves at least this many days in best condition
+  default_destination: munich
+  destinations:              # Approximate road distances from Bleiswijk (NL); not route-planned
+    - {id: local, name: Local market (Rotterdam), distance_km: 30}
+    - {id: paris, name: Paris, distance_km: 500}
+    - {id: munich, name: Munich, distance_km: 850}
+    - {id: barcelona, name: Barcelona, distance_km: 1500}
+    - {id: madrid, name: Madrid, distance_km: 1750}
+
 confidence:                  # Team choice, approved by the user (D11); level = worst of the three parts
   day_range_high_max: 7      # best-day range (days) at most this -> high (D11: real ranges are 6-12 days)
   day_range_medium_max: 12   # at most this -> medium, else low
@@ -119,3 +143,33 @@ assumptions:
     unit: share of pots
     source: Team choice (proposed)
     if_wrong: A lower bar shows an earlier date.
+  - name: Fruit counts as finished growing at
+    key: growth.complete_share
+    unit: share of final fruit weight
+    source: Team choice; growth curve fitted on the crop weighings
+    if_wrong: A higher share moves the earliest pluck day later.
+  - name: Fruit-weight curve steepness
+    key: growth.prior_steepness
+    unit: per degree-day
+    source: Fitted on all six rooms' weighings (this season); in production, the grower's previous crop
+    if_wrong: A flatter curve finishes growing later, so the pluck day moves later.
+  - name: Truck temperature
+    key: logistics.transit_temp_c
+    unit: °C
+    source: Common practice for partly ripe tomato (12-15 °C); not from the dataset
+    if_wrong: A warmer truck ripens pots on the road; they arrive riper with fewer shelf days.
+  - name: Shop temperature
+    key: logistics.shop_temp_c
+    unit: °C
+    source: Typical retail room temperature; not from the dataset
+    if_wrong: A warmer shop shortens the days in best condition.
+  - name: Driving per day
+    key: logistics.driving_hours_per_day
+    unit: hours at 70 km/h
+    source: Team choice (one driver)
+    if_wrong: Two drivers halve the days on the road for far destinations.
+  - name: Pots come off the shelf at
+    key: logistics.end_of_life_pct_red
+    unit: "% of fruit weight red"
+    source: Team assumption, general post-harvest practice (best condition is taken as 70-90 % red)
+    if_wrong: Shifts the sell-by date and the ship-by day.
