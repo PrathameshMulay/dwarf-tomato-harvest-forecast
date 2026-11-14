@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Replay a greenhouse harvest decision with real dwarf tomato data.">
+  <title>HarvestWindow | Greenhouse harvest planner</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="replay-data.js"></script>
+  <script defer src="camera/frames.js"></script>
+  <script defer src="sample.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="#planner"><span class="brand-mark" aria-hidden="true">✦</span> HarvestWindow</a>
+    <nav aria-label="Sections"><a href="#planner">Planner</a><a href="#evidence">Backtest</a><a href="#methods">Methods</a></nav>
+  </header>
+  <main id="planner">
+    <div class="intro">
+      <div><p class="eyebrow">Dwarf tomato · Greenhouse harvest planner</p><h1>Is it time to harvest?</h1></div>
+      <label class="room-control">Greenhouse <select id="room"></select></label>
+    </div>
+    <div class="workspace">
+      <section class="decision panel" aria-labelledby="decision-title">
+        <div class="decision-top"><p class="eyebrow">Decision replay</p><time id="as-of"></time></div>
+        <h2 id="decision-title"></h2>
+        <p id="reason" aria-live="polite"></p>
+        <div class="votes" aria-label="Scenario split"><div id="vote-bar"></div></div>
+        <div class="vote-labels"><span id="near-count"></span><span id="late-count"></span></div>
+        <div id="sample-controls"></div>
+        <details id="sample-entry">
+          <summary>Try a different crop sample</summary>
+          <form id="sample-form">
+            <label>Red by weight (%) <input name="red" type="number" required min="0" max="100" step="0.1" value="55.3"></label>
+            <label>Total fruit per plant (g) <input name="grams" type="number" required min="1" max="2000" step="1" value="340"></label>
+            <button class="primary">Update forecast</button>
+          </form>
+        </details>
+      </section>
+      <section class="panel outlook" aria-labelledby="outlook-title">
+        <div class="section-heading"><div><p class="eyebrow">21-day outlook</p><h2 id="outlook-title">Harvest forecast</h2></div>
+          <div class="tabs" aria-label="Forecast metric">
+            <button data-metric="red" aria-pressed="true">Ripeness</button>
+            <button data-metric="sellable" aria-pressed="false">Sellable pots</button>
+            <button data-metric="profit" aria-pressed="false">Profit</button>
+          </div>
+        </div>
+        <div id="chart" class="chart"></div>
+        <label class="scrubber">Inspect a date <input id="forecast-day" type="range" min="0" max="21" value="0"></label>
+        <p id="point-detail" class="point-detail" aria-live="polite"></p>
+      </section>
+    </div>
+    <div class="stats" aria-label="Decision metrics">
+      <div class="panel stat"><span>Central harvest date</span><strong id="best-date"></strong><small id="scenario-window"></small></div>
+      <div class="panel stat"><span>Sellable today</span><strong id="sellable"></strong><small>Estimated share of pots</small></div>
+      <div class="panel stat"><span>Ripeness today</span><strong id="ripeness"></strong><small>Red fruit by fresh weight</small></div>
+    </div>
+    <section id="camera-section" class="panel camera-section" aria-labelledby="camera-title">
+      <div class="section-heading"><div><p class="eyebrow">Camera evidence</p><h2 id="camera-title">What the canopy camera saw</h2></div></div>
+      <p id="camera-status"></p>
+      <div id="camera-frames" class="frames"></div>
+    </section>
+    <section id="evidence" class="panel evidence" aria-labelledby="evidence-title">
+      <div class="section-heading"><div><p class="eyebrow">Six held-out greenhouses</p><h2 id="evidence-title">Did the sampling policy help?</h2></div></div>
+      <p>Forecast from November 5. Score the predicted ripeness at each room’s recorded harvest, 6–16 days later.</p>
+      <div class="table-scroll"><table id="metrics"></table></div>
+      <details><summary>See the six room-level predictions</summary><div class="table-scroll"><table id="room-results"></table></div></details>
+      <p class="note">The mean baseline has the lowest error on this endpoint. The planners also estimate how ripeness changes day by day so growers can compare harvest dates.</p>
+    </section>
+    <section id="methods" class="panel evidence" aria-labelledby="methods-title">
+      <div class="section-heading"><div><p class="eyebrow">Model and assumptions</p><h2 id="methods-title">How the recommendation works</h2></div></div>
+      <div class="method-grid">
+        <article><h3>Forecast ripening</h3><p>Fit a ripening curve to accumulated warmth in five completed greenhouse rooms. Shift it for the held-out room once three consecutive days of red canopy pixels are visible. Use warmth when that signal is missing.</p></article>
+        <article><h3>Compare harvest days</h3><p>Vary the ripening curve, warmth, daily costs and sale price. Use an 85% sellable-pot target and the earliest date within €0.005/m²/day of the scenario optimum. Scenario ranges describe sensitivity to these assumptions.</p></article>
+        <article><h3>Sample when timing is disputed</h3><p>Ask for a sample when some scenarios choose today and others choose a later date or have no eligible date. Update ripeness and fruit weight after sampling. If the decision remains disputed, reassess tomorrow.</p></article>
+      </div>
+      <p class="note">One crop cycle at one site. Training uses the other rooms’ completed records. The held-out room only contributes data available by its cutoff. Fruit-weight share approximates the fruit-count eligibility rule. Prices, pot variation, future climate, and costs are scenario inputs. Harvesting on an alternate date has no observed profit outcome in this dataset.</p>
+    </section>
+  </main>
+  <footer><span>HarvestWindow · Precision &amp; Digital Agriculture Hackathon</span><a href="https://doi.org/10.4121/fa102772-32db-4b30-bace-12f2016722ce.v1">WUR data · CC BY 4.0</a></footer>
+</body>
+</html>
