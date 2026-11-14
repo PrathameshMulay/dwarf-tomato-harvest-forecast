@@ -72,7 +72,7 @@ def check_folder(folder: Path) -> list[str]:
 
 def main():
     if len(sys.argv) > 1:
-        folder = Path(sys.argv[1])
+        folder = Path(sys.argv[1]).resolve()
     else:
         data, mock = REPO / 'app' / 'data', REPO / 'app' / 'mock'
         folder = data if any(data.glob('*.json')) else mock
