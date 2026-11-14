@@ -143,7 +143,7 @@
   /* ---------- state in the URL hash, so a demo link reopens the same screen ---------- */
   function readHash() {
     const p = new URLSearchParams(location.hash.slice(1));
-    S.view = ['home', 'room', 'alerts', 'how'].includes(p.get('view')) ? p.get('view') : 'home';
+    S.view = ['home', 'room', 'alerts', 'how', 'input'].includes(p.get('view')) ? p.get('view') : 'home';
     S.room = p.get('room');
     const owner = S.room && idx.rooms.get(S.room);
     if (owner && !p.get('c')) S.customer = owner.customer_id;   // deep link to a room opens its own customer
@@ -186,7 +186,10 @@
       if (t) document.documentElement.dataset.theme = t;
     } catch (e) { /* storage blocked: follow the OS setting */ }
     let timer;
-    window.addEventListener('resize', () => { clearTimeout(timer); timer = setTimeout(render, 150); });
+    window.addEventListener('resize', () => {
+      if (S.view === 'input') return;
+      clearTimeout(timer); timer = setTimeout(render, 150);
+    });
     window.addEventListener('hashchange', () => { readHash(); render(); });
   }
   function toggleTheme() {
@@ -194,7 +197,7 @@
     const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     root.dataset.theme = dark ? 'light' : 'dark';
     try { localStorage.setItem('hw-theme', root.dataset.theme); } catch (e) { /* ignore */ }
-    render();
+    if (S.view !== 'input') render();
   }
   function syncControls() {
     $('#customer').value = S.customer;
@@ -301,9 +304,10 @@
     const area = meta.area_m2;
     const atEdge = fc.length > 0 && d.best_day === fc[fc.length - 1].date;
     main.innerHTML = `${back}
-      <div class="page-head">
-        <div class="room-top"><h1>${esc(roomName(room))}</h1>${pill(d.status)}</div>
-        <p class="lede">Best harvest day is an estimated <b>${day(d.best_day)}</b> (${rel(S.today, d.best_day)})${d.best_day_low === d.best_day_high ? '' : ', '}${d.best_day_low === d.best_day_high ? '' : `likely between ${short(d.best_day_low)} and ${short(d.best_day_high)}`}${atEdge ? ' — at the end of the forecast, so it may be later' : ''}. ${esc(STATUS[d.status].why)}</p>
+      <div class="card field-hero">
+        <div class="room-top"><div><div class="ctl-label">${esc(roomName(room))} · Potted dwarf tomatoes</div><span>Estimated best harvest day</span><h1>${day(d.best_day)}</h1></div>${pill(d.status)}</div>
+        <p class="lede">${rel(S.today,d.best_day)} · likely ${span2(d.best_day_low,d.best_day_high)}. ${esc(STATUS[d.status].why)}${atEdge ? ' Best day is at the forecast limit.' : ''}</p>
+        <div class="harvest-strip" id="grower-strip" aria-label="Harvest calendar"></div>
       </div>
       <div class="kpis">
         <div class="kpi"><div class="kpi-k">Best harvest day</div><div class="kpi-v">${short(d.best_day)}</div><div class="kpi-s">${euro(d.profit_best_m2_day)} per m² per day grown</div></div>
@@ -314,6 +318,8 @@
       <div class="two">
         <section class="card">
           <h2>Harvest window</h2>
+          <div id="goal-chart"></div>
+          <details><summary>Detailed profit forecast</summary>
           <p class="finding">${profitFinding(d)}</p>
           <div class="legend">
             <span><i class="sw"></i>Expected profit</span><span><i class="sw band"></i>Low–high range</span>
@@ -323,9 +329,11 @@
           <div class="chart" id="chart-profit"></div>
           <p class="caption">€ per m² per day grown, after plant, re-spacing, energy and fixed costs. Range: ripening early or late and price low or high. Source: forecast.json, days.json (model estimate; assumptions labelled on "How it works").</p>
           ${numbersTable(fc, [['date', 'Day', short], ['profit_low', 'Low €', (v) => euro(v)], ['profit_m2_day', 'Expected €', (v) => euro(v)], ['profit_high', 'High €', (v) => euro(v)], ['sellable_share', 'Pots ready', share]])}
-        </section>
+        </details></section>
         <section class="card">
-          <h2>Ripeness forecast</h2>
+          <h2>Crop ripeness</h2>
+          ${ripeScale(d.pct_red_now)}
+          <details><summary>Ripeness forecast and crop samples</summary>
           <p class="finding">An estimated ${pct(d.pct_red_now)} of fruit weight is red today (likely ${pct(d.pct_red_low)}–${pct(d.pct_red_high)}); ${share(d.sellable_share_now)} of pots would sell.</p>
           <div class="legend">
             <span><i class="sw past"></i>Earlier estimates</span><span><i class="sw"></i>Forecast</span><span><i class="sw band"></i>Likely range</span>
@@ -334,11 +342,14 @@
           <div class="chart" id="chart-ripe"></div>
           <p class="caption">% of fruit weight that is red. Forecast from warmth since planting (degree-days), corrected by photos and crop samples. Source: days.json, forecast.json, evidence.json.</p>
           ${numbersTable(fc, [['date', 'Day', short], ['pct_red_low', 'Low', pct], ['pct_red', 'Expected', pct], ['pct_red_high', 'High', pct]])}
+        </details>
+          <h3 class="section">Today's evidence</h3>
+          ${evidenceBlock(ev,d)}
         </section>
       </div>
-      <div class="two">
-        <section class="card">
-          <h2>How sure we are: ${confBadge(d.confidence)}</h2>
+      <div>
+        <details class="card">
+          <summary>How sure we are: ${confBadge(d.confidence)}</summary>
           <p class="muted small">The level is the weakest of three checks.</p>
           <div class="parts">
             <div class="part"><div class="part-k">Day range</div><div class="part-v">${plural(d.conf_day_range_days, 'day')}</div><div class="part-s">Likely range of the best day (${span2(d.best_day_low, d.best_day_high)}). Narrower is better.</div></div>
@@ -348,18 +359,15 @@
           <h3>Why</h3>
           <ul class="reasons">${(d.conf_reasons || []).map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
           <p class="caption">Model used today: ${esc(MODEL[d.model] || d.model)}. Source: days.json.</p>
-        </section>
-        <section class="card">
-          <h2>Today's evidence</h2>
-          ${evidenceBlock(ev, d)}
-        </section>
+        </details>
+
       </div>
       ${idx.dests.length ? `<section class="card section" id="ship">
         <h2>When to pluck for shipping</h2>
         <p class="muted small">Pick where the pots go. The pluck day is the earliest day the fruit has stopped gaining weight and enough pots are ready to sell when they arrive; picking later only uses up shelf life.</p>
         <div class="whatif-ctl">
           <label for="dest" class="ctl-label">Destination</label>
-          <select id="dest">${idx.dests.map((x) => `<option value="${esc(x.id)}"${x.id === S.dest ? ' selected' : ''}>${esc(x.name)} · ${Number(x.distance_km).toLocaleString('en')} km · ${x.transit_days ? plural(x.transit_days, 'day') + ' by truck' : 'same day'}</option>`).join('')}</select>
+          <select id="dest">${idx.dests.map((x) => `<option value="${esc(x.id)}"${x.id === S.dest ? ' selected' : ''}>${esc(x.name)} · ${Math.round(x.distance_km / 1.609344).toLocaleString('en')} mi · ${x.transit_days ? plural(x.transit_days, 'day') + ' by truck' : 'same day'}</option>`).join('')}</select>
         </div>
         <div id="ship-out" aria-live="polite"></div>
         <h3>All destinations</h3>
@@ -368,7 +376,7 @@
         <h3>Plan your own trip</h3>
         <form id="trip-form" class="trip-form">
           <label>Where to<input name="name" maxlength="60" value="My buyer"></label>
-          <label>Road distance (km)<input name="distance_km" type="number" min="0" max="5000" step="10" value="1200" required></label>
+          <label>Road distance (miles)<input name="distance_miles" type="number" min="0" max="3107" step="any" value="746" required></label>
           <label>Drivers<select name="drivers"><option value="1">1 (8 h a day)</option><option value="2">2 (16 h a day)</option></select></label>
           <label>Truck temperature (°C)<input name="transit_temp_c" type="number" min="0" max="30" step="0.5" value="${idx.truck.temp_c}" required></label>
           <label>Shop temperature (°C)<input name="shop_temp_c" type="number" min="5" max="35" step="0.5" value="${idx.truck.shop_temp_c}" required></label>
@@ -399,18 +407,34 @@
         </div>
         <div id="wi-out" aria-live="polite"></div>
       </section>`;
-    drawProfit($('#chart-profit'), fc, d, meta);
-    drawRipe($('#chart-ripe'), fc, d, meta);
+    function goals() {
+      const destination = idx.dests.find(item => item.id === S.dest) || idx.dests[0];
+      const shipping = destination && idx.ship.get(room + '|' + S.today + '|' + destination.id);
+      showGoals($('#goal-chart'), fc, {
+        best:d.best_day, ship:shipping?.pluck_day, look:fc.find(row => row.pct_red >= 70)?.date,
+        projected:destination && idx.truck ? Trip.projectTrip(fc,d,idx.truck,{transit_days:destination.transit_days}) : [],
+        destination:destination?.name
+      }, $('#grower-strip'));
+    }
+    goals();
+    const profitDetails = $('#chart-profit').closest('details');
+    profitDetails.addEventListener('toggle', () => {
+      if (profitDetails.open) drawProfit($('#chart-profit'), fc, d, meta);
+    });
+    const ripeDetails = $('#chart-ripe').closest('details');
+    ripeDetails.addEventListener('toggle', () => {
+      if (ripeDetails.open) drawRipe($('#chart-ripe'), fc, d, meta);
+    });
     const slider = $('#delta');
     slider.addEventListener('input', () => {
       S.delta = Number(slider.value);
       updateWhatif(d, area);
-      drawProfit($('#chart-profit'), fc, d, meta);
+      if (profitDetails.open) drawProfit($('#chart-profit'), fc, d, meta);
     });
     updateWhatif(d, area);
     if (idx.dests.length) {
       const sel = $('#dest');
-      sel.addEventListener('change', () => { S.dest = sel.value; updateShip(d); });
+      sel.addEventListener('change', () => { S.dest = sel.value; updateShip(d); goals(); });
       updateShip(d);
       setupTrip(d, fc);
       setupChat(d, fc);
@@ -477,9 +501,9 @@
     const run = () => {
       if (!form.checkValidity()) { $('#trip-out').innerHTML = '<p class="muted small">Check the highlighted values.</p>'; return; }
       const f = new FormData(form);
-      const plan = Trip.planTrip(fc, d, idx.truck, { distance_km: +f.get('distance_km'), drivers: +f.get('drivers'),
+      const plan = Trip.planTrip(fc, d, idx.truck, { distance_km: +f.get('distance_miles') * 1.609344, drivers: +f.get('drivers'),
         transit_temp_c: +f.get('transit_temp_c'), shop_temp_c: +f.get('shop_temp_c'), min_best_shelf_days: +f.get('min_best_shelf_days') });
-      $('#trip-out').innerHTML = tripHTML(plan, String(f.get('name') || 'Your trip') + ` (${(+f.get('distance_km')).toLocaleString('en')} km)`);
+      $('#trip-out').innerHTML = tripHTML(plan, String(f.get('name') || 'Your trip') + ` (${(+f.get('distance_miles')).toLocaleString('en')} mi)`);
     };
     form.addEventListener('submit', (e) => { e.preventDefault(); run(); });
     if (S.chat.plan && S.chat.key === S.room + '|' + S.today) $('#trip-out').innerHTML = tripHTML(S.chat.plan.plan, S.chat.plan.label);
@@ -866,6 +890,137 @@ Rules:
         </ul></section>`;
   }
 
+
+  function ripeScale(value) {
+    const active = [1, 10, 30, 60, 90].filter(bound => value >= bound).length;
+    return '<div class="ripe-scale" aria-hidden="true">' + Array.from({length:6}, (_,i) =>
+      '<span' + (i === active ? ' class="active"' : '') + '></span>').join('') +
+      '</div><small>' + pct(value) + ' red by fruit weight</small>';
+  }
+
+  function showGoals(el, rows, options, strip) {
+    const marks = [['Shipping', options.ship, 'ship'], ['Most profit',options.best,'best'], ['70% red',options.look,'look']];
+    const best = rows.find(item => item.date === options.best)?.profit_m2_day;
+    if (strip) strip.innerHTML = rows.map(row => {
+      const goal = marks.filter(item => item[1] === row.date).map(item => item[0]).join(', ');
+      const color = row.date === options.best ? 'best' : row.profit_m2_day < 0 ? 'loss'
+        : best > 0 && row.profit_m2_day >= best * .9 ? 'zone' : row.sellable_share >= .95 ? 'ready' : '';
+      return '<div class="day-tile ' + color + (row === rows[0] ? ' today' : '') +
+        '" title="' + esc(day(row.date) + (goal ? ' · ' + goal : '')) + '"><small>' +
+        day(row.date).slice(0,1) + '</small><b>' + Number(row.date.slice(-2)) + '</b>' +
+        (goal ? '<span class="cal-pin" aria-label="' + esc(goal) + '">●</span>' : '') + '</div>';
+    }).join('');
+    const view = el.querySelector('[aria-pressed="true"]')?.dataset.metric || 'profit';
+    el.innerHTML = '<div class="goal-pins">' + marks.map(([label,date,kind]) =>
+      '<div class="' + kind + '"><small>' + label + '</small><strong>' +
+      (date ? short(date) : 'Outside outlook') + '</strong></div>').join('') +
+      '</div><div class="goal-toggle" role="group" aria-label="Chart metric">' +
+      [['profit','Economics'],['red','Ripeness'],['ship','Shipping']].map(([key,label]) =>
+        '<button type="button" data-metric="' + key + '" aria-pressed="' + (key === view) + '">' + label + '</button>').join('') +
+      '</div><p class="caption goal-unit"></p><div class="chart goal-plot"></div><div class="goal-table"></div>';
+    const arrival = new Map((options.projected || []).map(row => [row.date,row]));
+    const chartRows = rows.map(row => ({date:row.date, profit:row.profit_m2_day, red:row.pct_red,
+      ship: arrival.has(row.date) ? 100*arrival.get(row.date).sellable_on_arrival : null}));
+    function paint(metric) {
+      for (const button of el.querySelectorAll('button[data-metric]')) button.setAttribute('aria-pressed', String(button.dataset.metric === metric));
+      const values = chartRows.filter(row => Number.isFinite(row[metric]));
+      const plot = el.querySelector('.goal-plot');
+      plot.replaceChildren();
+      const units = metric === 'profit' ? (options.custom ? '€ per m² at harvest' : '€ per m² per day grown')
+        : metric === 'red' ? '% red by fruit weight' : '% of pots ready to sell on arrival';
+      const label = metric === 'ship' && options.destination ? units + ' · ' + options.destination : units;
+      el.querySelector('.goal-unit').textContent = label;
+      el.querySelector('.goal-table').innerHTML = numbersTable(values,[['date','Harvest date',short],
+        [metric,label,metric === 'profit' ? euro : pct]]);
+      if (!values.length) { plot.textContent = 'No shipping projection for this destination.'; return; }
+      const f = frame(plot,265,44);
+      f.svg.attr('viewBox', '0 0 ' + f.W + ' 265').style('width','100%').style('height','auto');
+      f.svg.attr('aria-label',label + ' by harvest day');
+      const x = d3.scaleUtc().domain(d3.extent(values,row => parse(row.date))).range([0,f.w]);
+      const y = d3.scaleLinear().domain(metric === 'profit'
+        ? [Math.min(-.001,d3.min(values,row => row.profit)), Math.max(.001,d3.max(values,row => row.profit))]
+        : [0,100]).nice().range([f.h,0]);
+      xAxis(f,x);
+      yAxis(f,y,metric === 'profit' ? (value => euro(value,3)) : pct);
+      const bestValue = values.find(row => row.date === options.best)?.profit;
+      if (metric === 'profit' && bestValue > 0) {
+        const zone = values.filter(row => row.profit >= bestValue*.9);
+        const step = f.w / Math.max(1, values.length-1);
+        for (const row of zone) {
+          const left = Math.max(0,x(parse(row.date))-step/2);
+          const right = Math.min(f.w,x(parse(row.date))+step/2);
+          f.g.append('rect').attr('class','goal-zone').attr('x',left).attr('width',right-left).attr('height',f.h);
+        }
+      }
+      f.g.append('path').attr('class','line').attr('d',d3.line().x(row=>x(parse(row.date))).y(row=>y(row[metric]))(values));
+      const [title,date,kind] = marks.find(mark => mark[2] === ({profit:'best',red:'look',ship:'ship'})[metric]);
+      vmarks(f,x,[{date,label:title,cls:kind}],1);
+      hover(f,x,values,row => '<b>' + day(row.date) + '</b> · ' +
+        (metric === 'profit' ? euro(row[metric]) : pct(row[metric])),row => y(row[metric]));
+    }
+    el.querySelector('.goal-toggle').addEventListener('click', event => {
+      if (event.target.dataset.metric) paint(event.target.dataset.metric);
+    });
+    paint(view);
+  }
+
+  function renderIntake() {
+    const fields = [
+      ['today','Crop check date','date','2024-11-06'], ['planted','Planting date','date','2024-09-03'],
+      ['redWeight','Red fruit per sampled pot (g)','number',156,0,2000],
+      ['weight','Total fruit per sampled pot (g)','number',300,1,2000],
+      ['temp','Recent average temperature (°C)','number',20,0,50],
+      ['fullWeightDay','Estimated fruit weight-ready date','date','2024-11-08'],
+      ['density','Pots per m²','number',12,1,100],
+      ['price','Sale price per pot (€)','number',2.15,.01,100],
+      ['spent','Growing cost so far (€/m²)','number',5,0,10000],
+      ['cost','Daily growing cost (€/m²)','number',.25,0,100],
+      ['transit','Truck travel (days)','number',2,0,21]
+    ];
+    main.innerHTML = '<section class="card field-hero"><div><span class="ctl-label">Forecast demo</span>' +
+      '<h1>Plan a new room</h1><p>Enter a crop check, then see three harvest dates.</p></div></section>' +
+      '<form class="card section" id="grower-form"><h2>Room and crop check</h2><div class="intake-fields">' +
+      '<label>Room name<input name="name" value="My greenhouse" required maxlength="60"></label>' +
+      fields.map(([key,label,type,value,min,max]) => '<label>' + label + '<input required name="' + key +
+        '" type="' + type + '" value="' + value + '"' +
+        (type === 'number' ? ' min="' + min + '" max="' + max + '" step="' + (key === 'transit' ? '1' : 'any') + '"' : '') +
+        '></label>').join('') + '</div><div class="intake-upload"><label>Upload temperatures (.csv), optional' +
+      '<input type="file" name="climate" accept=".csv,text/csv"></label>' +
+      '<a download="temperature-example.csv" href="temperature-example.csv">Download an example CSV</a></div>' +
+      '<p class="caption">Upload 3–7 daily averages ending on the crop check date. The file replaces the manual temperature.</p>' +
+      '<button class="btn" type="submit">Estimate harvest dates</button><p id="intake-error" role="alert"></p></form>' +
+      '<section class="card section" id="intake-result" hidden><h2 id="intake-title"></h2><div id="intake-chart"></div>' +
+      '<details><summary>Assumptions and data handling</summary><p>This browser demo anchors a trial curve (slope 0.035 per degree-day) to your crop check and holds future warmth constant. ' +
+      'The estimated weight-ready date comes from your input. The financial chart uses fixed fruit weight, €0.75 per pot, and your entered growing costs. ' +
+      'Shipping is a trial-model estimate for whole pots. The simulator has no measured shipment outcomes. No calibration or confidence grade is generated for your room. Files stay in this browser.</p></details></section>';
+    const form = $('#grower-form');
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const error = $('#intake-error');
+      const output = $('#intake-result');
+      const submit = form.querySelector('button[type=submit]');
+      error.textContent = '';
+      output.hidden = true;
+      submit.disabled = true;
+      try {
+        if (!idx.truck) throw Error('Shipping settings are unavailable in this demo.');
+        const values = Object.fromEntries(new FormData(form));
+        const file = values.climate;
+        if (file?.size > 8192) throw Error('Use a CSV under 8 KB with at most seven rows.');
+        const observations = file?.name ? Grower.readCSV(await file.text()) : null;
+        for (const [key,,type] of fields) if (type === 'number') values[key] = Number(values[key]);
+        const result = Grower.project({...values,slope:.035},observations,idx.truck,Trip);
+        $('#intake-title').textContent = values.name + ' · estimated harvest dates';
+        output.hidden = false;
+        showGoals($('#intake-chart'), result.rows, {
+          best:result.best?.date, ship:result.shipping.pluck_day, look:result.rows.find(row=>row.pct_red>=70)?.date,
+          projected:result.arrivalRows, custom:true
+        });
+        output.scrollIntoView({block:'start'});
+      } catch (e) { error.textContent = e.message; }
+      finally { submit.disabled = false; }
+    });
+  }
   /* ---------- router ---------- */
   function render() {
     tip.hidden = true;
@@ -873,6 +1028,7 @@ Rules:
     if (S.view === 'room') renderRoom();
     else if (S.view === 'alerts') renderAlerts();
     else if (S.view === 'how') renderHow();
+    else if (S.view === 'input') renderIntake();
     else renderHome();
   }
 

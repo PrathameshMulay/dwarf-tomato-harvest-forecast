@@ -93,18 +93,20 @@ def check_data(folder: Path) -> list[str]:
 
 
 def check_static() -> list[str]:
-    """The page loads only d3 (pinned, cdnjs) from the network and uses relative paths."""
+    """The page uses relative assets, pinned D3 and the design's font stylesheet."""
     errs = []
+    fonts = ('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700'
+             '&family=IBM+Plex+Sans:wght@400;500;600&display=swap')
     for f in ('index.html', 'app.js', 'style.css'):
-        text = (APP / f).read_text()
+        text = (APP / f).read_text(encoding='utf-8')
         for url in re.findall(r'https?://[^\s"\'`)<>]+', text):
-            if url != D3:
+            if url != D3 and (f != 'index.html' or url != fonts):
                 errs.append(f'{f}: unexpected network URL {url}')
         if re.search(r'''(src|href)=["']/''', text):
             errs.append(f'{f}: absolute path in src/href')
-    if D3 not in (APP / 'index.html').read_text():
+    if D3 not in (APP / 'index.html').read_text(encoding='utf-8'):
         errs.append('index.html does not load the pinned d3 v7.9.0 from cdnjs')
-    if 'Demo customer — replayed 2024 data' not in (APP / 'index.html').read_text():
+    if 'Demo customer — replayed 2024 data' not in (APP / 'index.html').read_text(encoding='utf-8'):
         errs.append('index.html lacks the demo banner text')
     return errs
 

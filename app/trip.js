@@ -52,7 +52,7 @@
    * `card`: the room's days.json row (today, k_x1000, weight_complete_day). `trip`: {distance_km | transit_days,
    * transit_temp_c, shop_temp_c, drivers, min_best_shelf_days} (missing values use meta.truck).
    */
-  function planTrip(fc, card, truck, trip = {}) {
+  function tripProjection(fc, card, truck, trip = {}) {
     const k = Number(card.k_x1000) / 1000;
     const days = trip.transit_days != null ? Math.max(0, Math.round(Number(trip.transit_days)))
       : transitDays(Number(trip.distance_km || 0), truck, Number(trip.drivers || 1));
@@ -67,6 +67,11 @@
       return { date: r.date, pct_at_pluck: r.pct_red, pct_on_arrival: arrive,
         sellable_on_arrival: sellableShare(arrive, truck), ...shelf(arrive, k, shopDD, truck) };
     });
+    return { rows, days, transitTemp, shopTemp, need };
+  }
+
+  function planTrip(fc, card, truck, trip = {}) {
+    const { rows, days, transitTemp, shopTemp, need } = tripProjection(fc, card, truck, trip);
     const sellable = rows.find((r) => r.sellable_on_arrival >= truck.earliest_sellable_share);
     const shipBy = rows.filter((r) => r.best_days != null && r.best_days >= need && r.best_until >= r.best_from).pop();
     const base = { transit_days: days, transit_temp_c: transitTemp, shop_temp_c: shopTemp, min_best_shelf_days: need,
@@ -87,7 +92,8 @@
       best_shelf_days: at.best_days, late: !!(base.ship_by_day && pluck > base.ship_by_day) };
   }
 
-  const api = { planTrip, transitDays, ripen, shelf, sellableShare };
+  const api = { planTrip, transitDays, ripen, shelf, sellableShare,
+    projectTrip: (...args) => tripProjection(...args).rows };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Trip = api;
 })(typeof window !== 'undefined' ? window : globalThis);

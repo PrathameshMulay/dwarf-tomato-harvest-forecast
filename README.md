@@ -85,6 +85,14 @@ ranks the rooms almost as the published results do (rank correlation 0.93).
 
 ## Run it
 
+The grower dashboard ships with demo data. From the repo root, run
+`python -m http.server 8767 --bind 127.0.0.1 --directory app`, then open
+`http://127.0.0.1:8767/`. The page loads D3 and the design fonts from their CDNs.
+
+- Open a room and toggle **Economics**, **Ripeness**, and **Shipping**. Each chart shows its own units against harvest dates. The shipping chart follows the selected buyer.
+- Open **Add a room** and enter crop weights, temperature, and costs. To demonstrate upload, download the example CSV and select it in the form. Uploaded daily temperatures replace the manual average. The demo processes the file in the browser and saves no room to the replay dataset.
+- The new-room estimate uses a fixed sample-anchored trial curve, a grower-entered date for full fruit weight, and assumed costs and transport conditions. Its economics chart shows total estimated euros per square meter at harvest. The existing replay chart shows euros per square meter per growing day. The new-room estimate is unvalidated on customer crops.
+
 ```bash
 pip install -r requirements.txt
 python3 prep.py path/to/autonomous_greenhouse_challenge4_timeseries.zip     # clean tables -> out/
