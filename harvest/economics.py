@@ -2,11 +2,15 @@
 
 Ported from `main`'s `forecast.py::profit_tables`, with every number taken from `config/crop.yaml`.
 
-The rules (challenge scoring, Maree et al. 2025, still "assumed" until L05 verifies them):
+The rules (challenge scoring, Maree et al. 2025):
 - a pot sells only if at least a third of its fruit weight is red;
-- revenue per pot rises with red fruit weight up to 150 g, then stops rising;
-- costs are plants (per pot), re-spacings (per m²) and the room's own daily energy + fixed costs;
+- revenue per pot follows the paper's gains curve in red grams (€0 below 50 g, capped at 150 g), with the
+  low-dry-matter curve as the main case and the high-dry-matter curve as the high price scenario (D10);
+- costs are plants (per pot), re-spacings (€ per m² per year per step, a daily fixed cost) and the
+  room's own daily energy + fixed costs;
 - rooms are ranked on net profit per m² per day grown.
+
+Rules verified against Maree et al. 2025 by L05 (decision D10).
 
 Pots in a room ripen at different times, so on any day some pots are sellable and some are not. We
 spread each pot's ripeness around the room's forecast % red (see `plant_pct`).
@@ -27,6 +31,9 @@ Z = norm.ppf(np.linspace(0.0125, 0.9875, 40))
 
 # Scenario columns of the forecast: ripening early = high % red band, late = low band.
 SCENARIOS = {'mid': 'pct_red', 'early': 'pct_red_high', 'late': 'pct_red_low'}
+# Price scenarios: settings key of each gains curve. 'mid' is the main case (dry matter <= 7 %).
+CURVES = {'mid': 'gains_curve_low', 'high': 'gains_curve_high'}
+DAYS_PER_YEAR = 365
 
 
 # ---------------------------------------------------------------- small pure pieces (unit-tested)
@@ -45,12 +52,22 @@ def plant_pct(pct_red: float, spread_sd: float, z: np.ndarray = Z) -> np.ndarray
     return 100 / (1 + np.exp(-x))
 
 
-def pot_revenue(pct_pots: np.ndarray, fw_g: float, price: float, econ: dict) -> np.ndarray:
-    """Euros per pot: price × (red grams, capped) / cap, and nothing for pots under the sellable share."""
+def gains(red_g: np.ndarray, curve: list) -> np.ndarray:
+    """Euros per pot for its red fruit grams: linear between the gains-curve points [red_g, eur].
+
+    Flat beyond the last point, so the 150 g cap is in the curve itself. Example with
+    [[0,0],[49.99,0],[80,1.60],[150,1.80]]: 115 g -> 1.60 + (115-80)/(150-80) * 0.20 = 1.70.
+    """
+    pts = np.asarray(curve, dtype=float)
+    return np.interp(np.asarray(red_g, dtype=float), pts[:, 0], pts[:, 1])
+
+
+def pot_revenue(pct_pots: np.ndarray, fw_g: float, curve: list, econ: dict) -> np.ndarray:
+    """Euros per pot from the gains curve on red grams (capped), and nothing for pots under the sellable share."""
     pct_pots = np.asarray(pct_pots, dtype=float)
     sold = pct_pots >= 100 * econ['sellable_red_share']
     red_g = np.minimum(pct_pots / 100 * fw_g, econ['red_cap_g'])
-    return price * red_g / econ['red_cap_g'] * sold
+    return gains(red_g, curve) * sold
 
 
 def profit_m2_day(revenue_per_pot: float, density: float, running_cost_m2: float, days_grown: int,
@@ -80,16 +97,20 @@ def fruit_weight(inputs: Inputs, room: str, today: date) -> float:
 def costs_so_far(inputs: Inputs, room: str, today: date, econ: dict) -> dict:
     """What the room has cost per m² up to today, its pots per m², and its recent daily cost rate.
 
-    running_m2 = energy + fixed costs from the log + €1.50 per re-spacing (a change in density).
-    rate_m2_day = mean daily log cost over the last `cost_rate_days` days (used for future days).
+    Re-spacing (D10) is a fixed cost of `respacing_cost_eur_m2_year` per m² per year for each spacing
+    step taken (a change in density), charged per day from the day of the step.
+    running_m2 = energy + fixed costs from the log + re-spacing charges so far.
+    rate_m2_day = mean daily log cost over the last `cost_rate_days` days + today's daily re-spacing
+    charge (used for future days).
     """
     d = known_by(inputs.daily[inputs.daily.room == room], today).sort_values('date')
     if not len(d):
         raise ValueError(f'no daily log for room {room!r} on or before {today}')
-    spacings = int((d.density.diff().fillna(0) != 0).sum())
-    return dict(running_m2=float(d.cost_eur_m2.sum() + econ['respacing_cost_eur_m2'] * spacings),
-                rate_m2_day=float(d.cost_eur_m2.tail(int(econ['cost_rate_days'])).mean()),
-                density=float(d.density.iloc[-1]), spacings=spacings)
+    steps = (d.density.diff().fillna(0) != 0).cumsum()          # spacing steps taken by each day
+    per_step_day = econ['respacing_cost_eur_m2_year'] / DAYS_PER_YEAR
+    return dict(running_m2=float(d.cost_eur_m2.sum() + per_step_day * steps.sum()),
+                rate_m2_day=float(d.cost_eur_m2.tail(int(econ['cost_rate_days'])).mean() + per_step_day * steps.iloc[-1]),
+                density=float(d.density.iloc[-1]), spacings=int(steps.iloc[-1]))
 
 
 # ---------------------------------------------------------------- contract functions
@@ -104,7 +125,7 @@ def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, para
 
     Adds: sellable_share, profit_m2_day, profit_low, profit_high, cost_to_date_m2 (contract), plus
     revenue_m2 and the early/late scenario columns that `harvest_window` needs.
-    The band is the min/max over ripening {early, expected, late} × price {low, expected, high}.
+    The band is the min/max over ripening {early, expected, late} × gains curve {main, high} (D10).
     """
     s = settings or load_settings()
     econ, spread = s['economics'], s['ripeness']['plant_spread_sd']
@@ -112,7 +133,7 @@ def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, para
     fw = fruit_weight(inputs, room, today)
     c = costs_so_far(inputs, room, today, econ)
     plants_m2 = c['density'] * econ['plant_cost_eur']
-    prices = {'low': econ['price_low'], 'mid': econ['price_eur_per_pot'], 'high': econ['price_high']}
+    curves = {tag: econ[key] for tag, key in CURVES.items()}
 
     out = fc.copy().reset_index(drop=True)
     rows = []
@@ -126,8 +147,8 @@ def profit_by_day(inputs: Inputs, room: str, today: date, fc: pd.DataFrame, para
             pots = plant_pct(getattr(x, col), spread)
             sfx = '' if scen == 'mid' else f'_{scen}'
             row['sellable_share' + sfx] = float((pots >= 100 * econ['sellable_red_share']).mean())
-            for tag, price in prices.items():
-                rev = float(pot_revenue(pots, fw, price, econ).mean())
+            for tag, curve in curves.items():
+                rev = float(pot_revenue(pots, fw, curve, econ).mean())
                 p = profit_m2_day(rev, c['density'], cost - plants_m2, days, econ['plant_cost_eur'])
                 profits.append(p)
                 if tag == 'mid':

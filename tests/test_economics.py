@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from harvest.economics import (costs_so_far, fruit_weight, harvest_window, plant_pct, pot_revenue,
+from harvest.economics import (costs_so_far, fruit_weight, gains, harvest_window, plant_pct, pot_revenue,
                                profit_by_day, profit_m2_day)
 
 TODAY = date(2024, 11, 6)
@@ -22,30 +22,42 @@ def test_plant_pct_spread_on_log_odds_scale():
     assert plant_pct(95, 12.5, z=np.array([1.0]))[0] == pytest.approx(96.90, abs=0.01)
 
 
+def test_gains_curve_interpolation(settings):
+    curve = settings['economics']['gains_curve_low']   # fixture: [[0,0],[49.99,0],[80,1.60],[150,1.80]]
+    # 45 g -> 0 (under 50 g); 65 g -> (65-49.99)/(80-49.99) * 1.60 = 0.800267; 80 g -> 1.60;
+    # 115 g -> 1.60 + 35/70 * 0.20 = 1.70; 150 g -> 1.80; 200 g -> 1.80 (flat past the last point)
+    got = gains(np.array([45.0, 65.0, 80.0, 115.0, 150.0, 200.0]), curve)
+    assert got == pytest.approx([0.0, 0.800267, 1.60, 1.70, 1.80, 1.80], abs=1e-6)
+
+
 def test_tiny_hand_worked_profit_day(settings):
     econ = settings['economics']
     # two pots, 300 g fruit each: pot A 20 % red (60 g red, under a third -> unsellable -> €0),
-    # pot B 60 % red (180 g red, capped at 150 g -> full price €2.15)
-    rev = pot_revenue(np.array([20.0, 60.0]), 300.0, 2.15, econ)
-    assert rev == pytest.approx([0.0, 2.15])
-    # mean €1.075 per pot; 20 pots/m², €30/m² other costs, 80 days grown, €0.75 per plant:
-    # (20 * (1.075 - 0.75) - 30) / 80 = (6.5 - 30) / 80 = -0.29375 €/m²/day
-    assert profit_m2_day(rev.mean(), 20, 30.0, 80, 0.75) == pytest.approx(-0.29375)
+    # pot B 60 % red (180 g red, capped at 150 g -> top of the main gains curve, €1.80)
+    rev = pot_revenue(np.array([20.0, 60.0]), 300.0, econ['gains_curve_low'], econ)
+    assert rev == pytest.approx([0.0, 1.80])
+    # mean €0.90 per pot; 20 pots/m², €30/m² other costs, 80 days grown, €0.75 per plant:
+    # (20 * (0.90 - 0.75) - 30) / 80 = (3 - 30) / 80 = -0.3375 €/m²/day
+    assert profit_m2_day(rev.mean(), 20, 30.0, 80, 0.75) == pytest.approx(-0.3375)
 
 
 def test_unsellable_pots_earn_nothing(settings):
     econ = settings['economics']
-    # just under a third red earns 0; just over earns price * red_g / 150: 0.34 * 300 = 102 g -> 2.15 * 102/150 = 1.462
-    rev = pot_revenue(np.array([33.0, 34.0]), 300.0, 2.15, econ)
+    # 33 % of 300 g = 99 g red, but under a third red -> 0 ; 34 % = 102 g -> 1.60 + 22/70 * 0.20 = 1.662857
+    # a pot a third red but only 120 g fruit (40 g red, under 50 g) also earns 0
+    rev = pot_revenue(np.array([33.0, 34.0]), 300.0, econ['gains_curve_low'], econ)
     assert rev[0] == 0.0
-    assert rev[1] == pytest.approx(1.462)
+    assert rev[1] == pytest.approx(1.662857, abs=1e-6)
+    assert pot_revenue(np.array([34.0]), 120.0, econ['gains_curve_low'], econ)[0] == 0.0
 
 
 def test_costs_so_far(inputs, settings):
-    # tomatonuts: 3 Sep..6 Nov = 65 log days * €0.24 = 15.6, plus one re-spacing (56 -> 28) * €1.50 = 17.1
+    # tomatonuts: 3 Sep..6 Nov = 65 log days * €0.24 = 15.6. One spacing step (56 -> 28) on 3 Oct (day 30),
+    # charged €1.50/m²/year = 1.5/365 a day for days 30..64 (35 days): 35 * 1.5 / 365 = 0.143836 -> 15.743836
+    # future daily rate = 0.24 + 1.5/365 = 0.244110
     c = costs_so_far(inputs, ROOM, TODAY, settings['economics'])
-    assert c['running_m2'] == pytest.approx(17.1)
-    assert c['rate_m2_day'] == pytest.approx(0.24)
+    assert c['running_m2'] == pytest.approx(15.743836, abs=1e-6)
+    assert c['rate_m2_day'] == pytest.approx(0.244110, abs=1e-6)
     assert c['density'] == 28.0 and c['spacings'] == 1
 
 
@@ -67,24 +79,24 @@ def _flat_forecast(pct, days=3):
 
 
 def test_profit_by_day_hand_worked(inputs, settings):
-    # all pots fully red: every pot earns €2.15 (300 g red capped at 150 g)
-    # revenue 28 pots * 2.15 = 60.2 €/m²; cost today 17.1 + plants 28 * 0.75 = 21 -> 38.1 €/m²
-    # day 0: 65 days grown -> (60.2 - 38.1) / 65 = 0.34 €/m²/day
-    # day 1: cost +0.24 = 38.34, 66 days -> 21.86 / 66 = 0.331212
+    # all pots fully red: every pot earns €1.80 (300 g red capped at 150 g, top of the main curve)
+    # revenue 28 pots * 1.80 = 50.4 €/m²; cost today 15.743836 + plants 28 * 0.75 = 21 -> 36.743836 €/m²
+    # day 0: 65 days grown -> (50.4 - 36.743836) / 65 = 0.210095 €/m²/day
+    # day 1: cost +0.244110 = 36.987945, 66 days -> 13.412055 / 66 = 0.203213
     c = profit_by_day(inputs, ROOM, TODAY, _flat_forecast(100.0), {}, settings=settings)
-    assert c.cost_to_date_m2.tolist()[:2] == pytest.approx([38.1, 38.34])
-    assert c.profit_m2_day.tolist()[:2] == pytest.approx([0.34, 0.331212], abs=1e-6)
+    assert c.cost_to_date_m2.tolist()[:2] == pytest.approx([36.743836, 36.987945], abs=1e-6)
+    assert c.profit_m2_day.tolist()[:2] == pytest.approx([0.210095, 0.203213], abs=1e-6)
     assert (c.sellable_share == 1.0).all()
-    # band: low price 1.75 -> (28 * 1.75 - 38.1) / 65 = 0.167692 ; high 2.50 -> (70 - 38.1) / 65 = 0.490769
-    assert c.profit_low[0] == pytest.approx(0.167692, abs=1e-6)
-    assert c.profit_high[0] == pytest.approx(0.490769, abs=1e-6)
+    # band: main curve is the low end (0.210095); high curve €2.00 -> (56 - 36.743836) / 65 = 0.296249
+    assert c.profit_low[0] == pytest.approx(0.210095, abs=1e-6)
+    assert c.profit_high[0] == pytest.approx(0.296249, abs=1e-6)
 
 
 def test_green_room_sells_nothing(inputs, settings):
     c = profit_by_day(inputs, ROOM, TODAY, _flat_forecast(1.0), {}, settings=settings)
     assert (c.sellable_share == 0).all() and (c.revenue_m2 == 0).all()
-    # only costs: -38.1 / 65 = -0.586154
-    assert c.profit_m2_day[0] == pytest.approx(-0.586154, abs=1e-6)
+    # only costs: -36.743836 / 65 = -0.565290
+    assert c.profit_m2_day[0] == pytest.approx(-0.565290, abs=1e-6)
 
 
 def test_profit_by_day_on_fixture_forecast(inputs, settings, forecast_fixture):
