@@ -14,7 +14,7 @@ This file says **what** we build. `docs/development-plan.md` says **who builds w
 | D2 | Users in the demo | Three fictional customer profiles ("demo customer" on screen), each owning two of the six real rooms. No real company names or logos |
 | D3 | Data | The organizer dataset (4th Autonomous Greenhouse Challenge, CC BY 4.0) is the primary input. It is replayed as if live: the app's "today" defaults to **6 Nov 2024** and can be moved day by day. Outside datasets are secondary, documented in `docs/assumptions.md` |
 | D4 | Stack | Python pipeline (pandas, numpy, scipy) writes small JSON files; the app is a static HTML/CSS/JS page reading those files, with d3 from cdnjs. No server. Published as a private claude.ai Artifact for the demo |
-| D5 | Harvest-day logic | The challenge's economic scoring rules (§5), once verified against Maree et al. 2025. Until verified they are labelled "assumed" in the app |
+| D5 | Harvest-day logic | The challenge's economic scoring rules (§5), verified against Maree et al. 2025 (D10) |
 | D6 | Honest testing | Every number shown for a room comes from models fitted **without that room's own hand measurements** (leave-one-room-out), using only data up to the app's "today" |
 | D7 | Language | Plain, low-jargon English for an executive audience. Say "estimated", never "will". Every chart states its source and assumptions |
 | D8 | Code reuse | Builds on `main` (ripening curve, photo onset, profit model). Ideas from `codex/harvestwindow-planner` (crop-sample check, mean baseline) are reused with credit, not copied wholesale |
@@ -95,10 +95,10 @@ The 04:00 and 08:00 photos (and noon on dark days) are tinted purple by the grow
 
 ## 5. Economics and harvest window (L02)
 
-Scoring rules (from Maree et al. 2025 per `main`'s code; **to be verified by L05**):
-- A pot sells only if at least one third of its fruit is red.
-- Revenue per pot rises with red fruit weight up to 150 g; above 150 g adds nothing. Price €2.15 per pot at full value (backed out from published profits; tested at €1.75–2.50).
-- Costs: €0.75 per plant, €1.50/m² per re-spacing, energy and fixed costs from the room's log; future daily cost = mean of the last 7 days.
+Scoring rules (verified against Maree et al. 2025 by L05; decision D10):
+- A pot sells only if at least one third of its fruit (by weight) is red.
+- Revenue per pot follows the paper's gains curve in red fruit grams: €0 below 50 g, rising to €1.60 at 80 g and €1.80 at 150 g; above 150 g adds nothing. That is the main case (dry matter ≤ 7%); the high case (dry matter ≥ 8%) is €1.80 at 80 g and €2.00 at 150 g. Dry matter isn't in the data, so it is shown as a scenario.
+- Costs: €0.75 per plant; €1.50/m² per year for each re-spacing step, as a fixed cost; energy and other fixed costs from the room's log; future daily cost = mean of the last 7 days.
 - Ranked on net profit per m² **per day grown**.
 
 Outputs per room and "today", over the next 21 days:
